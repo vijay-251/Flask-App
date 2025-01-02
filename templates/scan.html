@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Details</title>
+    <style>
+        body, html {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
+
+        .box {
+            width: 300px;
+            background: white;
+            border: 1px solid black;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .logo img {
+            max-width: 220px;
+            margin-bottom: 20px;
+            margin-left: 100px;
+
+        }
+
+        .vis {
+            background: linear-gradient(to left, #040e56, #006b5d);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .inputbox {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .inputbox label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .inputbox input,
+        .inputbox select {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+        }
+        .button-row button {
+            flex: 0 0 auto; /* Prevent the button from stretching */
+            width: 120px; /* Set a fixed width */
+            padding: 8px;
+            font-size: 14px;
+            text-align: center;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            }
+
+            .button-row a {
+            flex: 0 0 auto; /* Prevent the link from stretching */
+            width: 120px; /* Set a fixed width */
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+            text-decoration: none;
+            background: #6c757d;
+            color: white;
+            border-radius: 5px;
+            display: inline-block;
+            text-align: center;
+            }
+
+            .button-row button.cancel {
+            background: #dc3545;
+            color: white;
+            margin-left: 150px;
+            }
+            .visno{
+                color: rgb(13, 13, 95);
+                font-size: 20px;
+                margin-left: 250px;
+                font-weight: bold;
+            }
+            .app{
+            background: linear-gradient(to left,#040e56,#006b5d);
+            color: White;
+            font-weight: bold;
+            text-align: center;
+            font-size: 14px;
+            margin-top: 20px;
+
+        }
+        .app a{
+            color: white;
+        }
+        .scanner-img img {
+            max-width: 200px;
+            height: auto;
+            margin-left: 200px;
+        }
+        .rf{
+            background: linear-gradient(to right,#040e56,#006b5d);
+            color: White;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="logo">
+    </div>
+    <div class="rf">{{visitor['companyname']}}</div>
+    <div class="id">
+        <!-- Scanner Image -->
+        <div class="scanner-img">
+            <img src="{{ url_for('static', filename='images/visitor_' + visitor['visitor_id'] + '_qr.png') }}" alt="Visitor QR Code">
+        </div>
+        <div class="name">{{visitor['name']}}</div>
+        <div class="visno">
+            {{ visitor['visitor_id'] }}
+        </div>
+    </div>
+    <div class="app">Visitor</div>
+</div>
+</body>
+</html>

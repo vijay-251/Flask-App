@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Stall</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+           body {
+            font-family: 'Open Sans', Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        header input[type="search"] {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            width: 200px;
+        }
+
+        header .icons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .controls select,
+        .controls input[type="text"] {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .controls button {
+            padding: 8px 15px;
+            background-color: #007f5f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .controls button:hover {
+            background-color: #006c4e;
+        }
+
+        .stall-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 10px;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .stall {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50px;
+            background-color: #e0e0e0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .stall.booked {
+            background-color: #007f5f;
+            color: white;
+            cursor: not-allowed;
+        }
+
+
+        .map-container {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        
+    
+        .modal {
+        display: none; /* Hidden by default */
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+        overflow: auto;
+    }
+
+    .modal-content {
+        background-color: white;
+        margin: 15% auto;
+        padding: 20px;
+        width: 80%;
+        max-width: 600px;
+        border-radius: 10px;
+    }
+
+    .close {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        position: absolute;
+        top: 10px;
+        right: 25px;
+        cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .slot {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    
+        .available {
+    color: green;
+}
+
+.booked {
+    color: red;
+}
+
+#statusResult {
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+    </style>
+</head>
+<body>
+    <header>
+        <input type="search" placeholder="Search">
+        <div class="icons">
+            <span>&#128276;</span>
+            <span>&#128100;</span>
+        </div>
+    </header>
+
+    <!-- Dropdown to filter by status -->
+    <select id="filter">
+        <option value="all">All</option>
+        <option value="available">Available</option>
+        <option value="booked">Booked</option>
+    </select>
+    <div id="slotList"></div> <!-- Grid container for slots -->
+  
+
+    <!-- The Modal -->
+    <div id="gridModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="slotGrid" class="slot-grid">
+                <!-- Dynamic grid content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <button onclick="viewMap()">View Map</button>
+
+    <!-- The Modal for Map -->
+    <div id="mapModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('mapModal')">&times;</span>
+            <img src="{{ url_for('static', filename='slot.png') }}" alt="Map" style="width: 100%; height: auto;">
+        </div>
+    </div>  
+
+    <!-- Slot number input -->
+    <input type="text" id="slotInput" placeholder="Enter Slot Number" />
+    <button onclick="checkSlotStatus()">Check Slot Status</button>
+
+    <div id="statusResult"></div>
+
+    <div class="container mt-4">
+        <h1 class="text-center">Book Stall</h1>
+        <h5 class="text-center">Registration No: {{ registration_no }}</h5>
+
+        <!-- Stall Grid -->
+        <div class="stall-grid mt-3" id="stall-grid">
+            {% for stall in slots %}
+            <div class="stall {{ 'booked' if stall.IsBooked else '' }}" 
+                 id="{{ stall.SlotNumber }}" data-status="{{ 'booked' if stall.IsBooked else 'available' }}">
+                {{ stall.SlotNumber }}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="map-container">
+            <img src="{{ url_for('static', filename='slot.png') }}" alt="Venue map">
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const stalls = document.querySelectorAll('.stall');
+
+            // Function to handle booking of stalls
+            stalls.forEach(stall => {
+                if (!stall.classList.contains('booked')) {
+                    stall.addEventListener('click', () => {
+                        const stallId = stall.id; // Stall ID from the div
+                        const registrationNo = "{{ registration_no }}"; // Registration number from Flask
+
+                        Swal.fire({
+                            title: "Do you want to book the stall?",
+                            showDenyButton: true,
+                            confirmButtonText: "Yes",
+                            denyButtonText: "No",
+                        }).then(result => {
+                            if (result.isConfirmed) {
+                                fetch("/book_stall", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                        stallId: stallId,
+                                        registrationId: registrationNo,
+                                        modifiedByUserName: "admin",
+                                        modifiedBy: 1,
+                                    }),
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        stall.classList.add('booked');
+                                        stall.textContent += ' (Booked)';
+                                        Swal.fire("Stall Booked!", "", "success");
+                                    } else {
+                                        Swal.fire("Error", data.message, "error");
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Error:", error);
+                                    Swal.fire("Error", "An error occurred.", "error");
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+        });
+
+    
+   
+
+
+
+
+        function checkSlotStatus() {
+            const slotNumber = document.getElementById('slotInput').value.trim();
+
+            if (slotNumber === "") {
+                alert("Please enter a slot number.");
+                return;
+            }
+
+            fetch(`/check_slot_status?slotNumber=${slotNumber}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const resultDiv = document.getElementById('statusResult');
+                    if (data.success) {
+                        resultDiv.textContent = `Slot ${slotNumber} is ${data.status}`;
+                        resultDiv.className = data.status.toLowerCase();
+                    } else {
+                        resultDiv.textContent = data.message;
+                        resultDiv.className = '';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('statusResult').textContent = 'An error occurred.';
+                });
+        }
+
+          // Show the grid modal when filter changes
+          document.getElementById('filter').addEventListener('change', function () {
+            filterSlots();
+        });
+
+        // Function to filter slots and display in a grid popup
+        function filterSlots() {
+            const filterValue = document.getElementById('filter').value;  // Get selected filter value
+
+            fetch(`/filter_slots?status=${filterValue}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const slotGrid = document.getElementById('slotGrid');
+                    slotGrid.innerHTML = '';  // Clear previous grid
+
+                    if (data.success && data.slots.length > 0) {
+                        data.slots.forEach(slot => {
+                            const slotDiv = document.createElement('div');
+                            slotDiv.textContent = `Slot ${slot.SlotNumber}: ${slot.Status}`;
+                            slotDiv.classList.add('slot', slot.Status.toLowerCase());
+                            slotGrid.appendChild(slotDiv);
+                        });
+                    } else {
+                        slotGrid.innerHTML = '<p>No slots found.</p>';
+                    }
+
+                    // Open the modal to show the grid
+                    viewGrid();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while fetching the slots.');
+                });
+        }
+
+        // Open the modal
+        function viewGrid() {
+            document.getElementById('gridModal').style.display = 'block';
+        }
+
+        // Close the modal
+        function closeModal() {
+            document.getElementById('gridModal').style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

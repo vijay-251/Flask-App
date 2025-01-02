@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>register</title>
+    <style>
+        body, html {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 380px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .vis {
+            background: linear-gradient(to left, #040e56, #006b5d);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .inputbox {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .inputbox label {
+            font-size: 25px;
+
+        }
+
+        .inputbox input,
+        .inputbox select {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Style for the View button */
+        button[type="submit"] {
+            background-color: #901B1D; /* Red color */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        button[type="submit"]:hover {
+            background-color: darkred; /* Darker red when hovered */
+        }
+
+        .button-row a {
+            flex: 0 0 auto; /* Prevent the link from stretching */
+            width: 120px; /* Set a fixed width */
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+            text-decoration: none;
+            background: #6c757d;
+            color: white;
+            border-radius: 5px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .logo img {
+            max-width: 220px;
+            margin-bottom: 20px;
+            margin-left: 100px;
+        }
+
+        .app {
+            background: linear-gradient(to left, #040e56, #006b5d);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            font-size: 14px;
+            margin-top: 80px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="logo">
+        </div>
+        <div class="form-box">
+            <form method="POST" action="/register">
+                <!-- Phone Number and Email -->
+                <div class="input-row">
+                    <div class="inputbox">
+                        <label>Enter your Phone Number *</label>
+                        <p>To view registration details</p>
+                        <input type="tel" name="ph" pattern="\d{10}" maxlength="10" title="Phone number must be exactly 10 digits" required>
+                    </div>
+                </div>
+                <button type="submit">View</button>
+            </form>
+            <div class="app">Application by <a href="https://pixoustech.com/" class="pt" id="restore-btn">Pixous Technologies </a></div>
+        </div>
+    </div>
+</body>
+</html>

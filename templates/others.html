@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>EOL Report - Sign Up</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+         body, html {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .vis {
+            background: linear-gradient(to left, #040e56, #006b5d);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .logo img {
+            max-width: 220px;
+            margin-bottom: 20px;
+        }
+        .app{
+             background: linear-gradient(to left, #040e56, #006b5d);
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo text-center">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="logo">
+        </div>
+        <div class="vis">OTHERS</div>
+        <form method="POST" action="/others">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="fn" class="form-label">First Name *</label>
+                    <input type="text" class="form-control" id="fn" name="fn" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="ln" class="form-label">Last Name *</label>
+                    <input type="text" class="form-control" id="ln" name="ln" required>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="ph" class="form-label">Phone Number *</label>
+                    <input type="tel" class="form-control" id="ph" name="ph" pattern="\d{10}" maxlength="10" title="Phone number must be exactly 10 digits" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="oc" class="form-label">Category *</label>
+                    <select id="oc" name="oc" class="form-select" required>
+                        <option value="">Select Category</option>
+                        <option value="Catering">Catering</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label for="email" class="form-label">Email Address *</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select id="gender" name="gender" class="form-select">
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="age" class="form-label">Age</label>
+                    <input type="text" class="form-control" id="age" name="age">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="state" class="form-label">State</label>
+                    <input type="text" class="form-control" id="state" name="state">
+                </div>
+                <div class="col-md-6">
+                    <label for="dis" class="form-label">District</label>
+                    <input type="text" class="form-control" id="dis" name="dis">
+                </div>
+            </div>
+            <p class="text-danger">{{error}}</p>
+            <div class="d-flex justify-content-between">
+                <a href="/" class="btn btn-secondary">Back</a>
+                
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+            <div class="app mt-3">Application by <a href="https://pixoustech.com/" class="text-white">Pixous Technologies</a></div>
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const submitButton = document.querySelector('button[type="submit"]');
+            submitButton.addEventListener('click', (event) => {
+                const confirmRegistration = confirm("Confirmation\nAre you sure you want to register?");
+                if (!confirmRegistration) {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

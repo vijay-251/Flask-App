@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stall Allocation</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+        <!-- SweetAlert CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.min.css">
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+</head>
+ 
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- SweetAlert JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.1/dist/sweetalert2.min.js"></script>
+
+    <!-- Custom CSS -->
+    <style>
+        /* Global styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+        }
+        body {
+  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", Helvetica, Arial, sans-serif; 
+}
+        .sidebar {
+            height: 100vh;
+            padding: 15px;
+            position: fixed;
+            width: 250px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 5px;
+        }
+        .sidebar a:hover {
+            background-color: #06568E;
+            color: white;
+            border-radius: 10px;
+        }
+        .content-area {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .top-bar {
+    background-color: #06568E;
+    color: white;
+    padding: 15px 20px;
+    font-weight: bold;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+
+.top-bar i {
+    font-size: 24px;  /* Adjust size of the user icon */
+}
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .table th {
+            background-color: #06568E;
+            color: white;
+        }
+        .btn-outline-primary {
+            margin-right: 10px;
+        }
+        .footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            color: #003366;
+        }
+        .page-link {
+            color: #003366;
+        }
+        .stall {
+    cursor: pointer;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+.stall.booked {
+    background-color: #28a745; /* Green color for booked stalls */
+    color: white;
+    pointer-events: none; /* Disable clicking */
+}
+.sidebar img {
+            width: 200px;
+            margin: 0 auto 20px;
+        }
+        .custom-btn {
+        background-color: #06568E;
+        color: white;
+        border: none;
+        margin-right: 10px;
+        }
+/* Make the table container responsive with horizontal scrolling */
+.table-responsive {
+    width: 100%; /* Full width of the container */
+    overflow-x: auto; /* Enables horizontal scrolling */
+    overflow-y: hidden; /* Disable vertical scrolling */
+}
+
+/* Table style */
+table {
+    width: 100%; /* Ensure the table takes full width */
+    table-layout: auto; /* Let the table expand based on its content */
+    white-space: nowrap; /* Prevent text wrapping in table cells */
+}
+
+/* Optional: Adding padding for table cells */
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+
+/* Optional: Border between rows */
+tbody tr {
+    border-bottom: 1px solid #ddd;
+}
+
+/* Optional: Make the header sticky */
+thead th {
+    position: sticky;
+    top: 0;
+    background-color: #003366; /* Custom background color for the header */
+    color: white; /* White text for the header */
+    z-index: 2; /* Keep header above the rows */
+}
+/* Adjust the layout to align items properly */
+.container {
+    margin-top: 20px;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.col-md-6 {
+    display: flex;
+    align-items: center;
+}
+
+.d-flex {
+    display: flex;
+}
+
+.justify-content-start {
+    justify-content: flex-start;
+}
+
+.justify-content-end {
+    justify-content: flex-end;
+}
+
+.me-2 {
+    margin-right: 10px;
+}
+
+.me-4 {
+    margin-right: 20px;
+}
+
+
+        
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="logo">
+        <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+        <a href="{{ url_for('registration') }}"><i class="fas fa-user-plus"></i>Registration</a>
+        <a href="#" class="active"><i class="fas fa-th"></i>Stall Allocation</a>
+        <a href="#" id="reportToggle" class="dropdown-toggle"><i class="fas fa-chart-bar"></i>Report</a>
+        <div id="reportDropdown" style="display: none;">
+                 <ul class="list-unstyled">
+                     <li><a href="{{ url_for('visitor_report') }}">Visitor</a></li>
+                     <li><a href="/seminar_report">Seminar Attendees</a></li>
+                     <li><a href="/exhibitor_report">Exhibitors</a></li>
+                     <li><a href="/others_report">Others</a></li>
+                 </ul>
+             </div>
+        <a href="{{ url_for('admin_login') }}"><i class="fas fa-sign-out-alt"></i>Logout</a>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <h4 class="m-0">Stall Allocation</h4>
+                <div class="d-flex align-items-center">
+                    <span>Welcome Admin</span>
+                    <i class="fas fa-user-circle ms-2" style="font-size: 24px;"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Page Title -->
+        <div class="mt-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">Home</li>
+                    <li class="breadcrumb-item active" aria-current="page">Stall Allocation</li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Filters -->
+        <!-- Filters -->
+ <form method="GET" action="{{ url_for('stall_allocation') }}">
+    <div class="d-flex">
+        <!-- Gender Filter -->
+       <!-- Gender Filter -->
+<select class="form-select me-2" name="gender" onchange="this.form.submit()">
+    <option value="">Select Gender</option>
+        <!-- Filters -->
+  {% for gender in dropdowns['Gender'] %}
+    <option value="{{ gender[0] }}" {% if gender_filter == gender[0] %}selected{% endif %}>{{ gender[0] }}</option>
+    {% endfor %}
+</select>
+
+<!-- Status Filter -->
+<!-- Status Filter -->
+<select class="form-select me-2" name="status" onchange="this.form.submit()">
+    <option value="">Select Status</option>
+    <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+    <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+    <option value="exhibitor" {% if status_filter == 'exhibitor' %}selected{% endif %}>Exhibitor</option>
+    <option value="stall_booked" {% if status_filter == 'stall_booked' %}selected{% endif %}>Stall Booked</option>
+</select>
+
+
+
+<!-- Category Filter -->
+<select class="form-select me-2" name="category" onchange="this.form.submit()">
+    <option value="">Select Category</option>
+    {% for category in dropdowns['BusinessCategory'] %}
+    <option value="{{ category[0] }}" {% if category_filter == category[0] %}selected{% endif %}>{{ category[0] }}</option>
+    {% endfor %}
+</select>
+
+<!-- State Filter -->
+<select class="form-select me-2" name="state" onchange="this.form.submit()">
+    <option value="">Select State</option>
+    {% for state in dropdowns['State'] %}
+    <option value="{{ state[0] }}" {% if state_filter == state[0] %}selected{% endif %}>{{ state[0] }}</option>
+    {% endfor %}
+</select>
+
+<!-- District Filter -->
+<select class="form-select me-2" name="district" onchange="this.form.submit()">
+    <option value="">Select District</option>
+    {% for district in dropdowns['District'] %}
+    <option value="{{ district[0] }}" {% if district_filter == district[0] %}selected{% endif %}>{{ district[0] }}</option>
+    {% endfor %}
+</select>
+
+    </div>
+  
+
+        </form>
+        
+      
+        
+        
+
+
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Left side: Entries, Excel, and PDF options -->
+                <div class="col-md-6 d-flex justify-content-start">
+                    <!-- Show Entries Dropdown -->
+                    <label for="entriesPerPage" class="me-2">Show Entries:</label>
+                    <select id="entriesPerPage" class="form-control me-4" onchange="updateEntriesPerPage()">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="25" selected>25</option>
+                    </select>
+        
+                    <button class="btn custom-btn" onclick="downloadExcel()">Excel</button>
+                    <button class="btn custom-btn" onclick="downloadPDF()">PDF</button>
+                </div>
+        
+                <!-- Right side: Search bar -->
+                <div class="col-md-6 d-flex justify-content-end">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search" style="width: 200px;" onkeyup="filterTable()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+            <table id="stall_allocationtable" class="table  align-middle">  
+                <thead class="custom-table-header" style="background-color: #003366;">
+                
+                    <tr>
+                        <th scope="col">Action</th>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Last Name</th>
+                        <th scope="col">Registration No</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Email Address</th>
+                        <th scope="col">Gender</th>
+                        <th scope="col">Phone</th>
+                        <th scope="col">State</th>
+                        <th scope="col">District</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exhibitor in exhibitors %}
+                    <tr>
+                        <td>
+                            <!-- Approve Button -->
+                            <form action="{{ url_for('update_exhibitor_status', action='approve') }}" method="POST" style="display: inline;" id="approveForm">
+                                <input type="hidden" name="registration_no" value="{{ exhibitor[2] }}">
+                                <button type="submit" class="btn btn-success btn-sm approve-btn" data-registration-no="{{ exhibitor[2] }}">Approve</button>
+                            </form>
+                
+                            <!-- Reject Button -->
+                            <form action="{{ url_for('update_exhibitor_status', action='reject') }}" method="post" style="display: inline;">
+                                <input type="hidden" name="registration_no" value="{{ exhibitor[2] }}">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to reject this exhibitor?')">Reject</button>
+                            </form>
+                        </td>
+                
+                        <td>{{ exhibitor[0] }}</td> <!-- FirstName -->
+                        <td>{{ exhibitor[1] }}</td> <!-- LastName -->
+                        <td>{{ exhibitor[2] }}</td> <!-- RegistrationNo -->
+                        <td>{{ exhibitor[3] }}</td> <!-- BusinessCategory -->
+                        <td>{{ exhibitor[4] }}</td> <!-- Email -->
+                        <td>{{ exhibitor[5] }}</td> <!-- Gender -->
+                        <td>{{ exhibitor[6] }}</td> <!-- Phone -->
+                        <td>{{ exhibitor[7] }}</td> <!-- State -->
+                        <td>{{ exhibitor[8] }}</td> <!-- District -->
+                
+                        <!-- Add Approved and Rejected columns here -->
+                        <td>
+                            {% if exhibitor[9] == 1 %}
+                                Approved
+                            {% elif exhibitor[9] == -1 %}
+                                Rejected
+                            {% elif exhibitor[9] == 0 %}
+                                Pending
+                            {% else %}
+                                Unknown Status
+                            {% endif %}
+                        </td>
+                        
+                        
+                        
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                
+            </table>
+        </div>
+     
+        <script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.approve-btn').forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();  // Prevent the form from submitting immediately
+
+            const registrationNo = this.dataset.registrationNo;
+            const imageUrl = "{{ url_for('static', filename='slot.png') }}";  // Image URL for venue map
+            const form = this.closest('form');  // Get the closest form element
+
+            // Show initial confirmation popup
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to approve this exhibitor?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, approve!'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    // Show the image popup after confirming
+                    Swal.fire({
+                        imageUrl: imageUrl,
+                        imageHeight: 500,
+                        imageAlt: 'Venue Map',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Submit the form after confirming
+                        form.submit();  // This submits the form to the server
+                    });
+                }
+            });
+        });
+    });
+});
+
+
+
+            const reportToggle = document.getElementById('reportToggle');
+    const reportDropdown = document.getElementById('reportDropdown');
+
+    // Add a click event to toggle the visibility of the reportDropdown
+    reportToggle.addEventListener('click', function() {
+        // Toggle the display of the dropdown menu
+        if (reportDropdown.style.display === 'none' || reportDropdown.style.display === '') {
+            reportDropdown.style.display = 'block';
+        } else {
+            reportDropdown.style.display = 'none';
+        }
+    });
+    function downloadExcel() {
+        // Example content for Excel file
+        const excelContent = `
+            <table>
+                <tr>
+                    <th>Header 1</th>
+                    <th>Header 2</th>
+                </tr>
+                <tr>
+                    <td>Data 1</td>
+                    <td>Data 2</td>
+                </tr>
+            </table>
+        `;
+
+        // Convert content to Blob
+        const blob = new Blob([excelContent], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8;" });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = 'example.xlsx';
+        link.click();
+    }
+
+    function downloadPDF() {
+        // Example content for PDF file
+        const pdfContent = `
+            This is an example PDF content.
+        `;
+
+        // Convert content to Blob
+        const blob = new Blob([pdfContent], { type: "application/pdf" });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = 'example.pdf';
+        link.click();
+    }
+    
+    function filterTable() {
+        // Get the search input value
+        const searchInput = document.getElementById('searchInput').value.toLowerCase();
+        
+        // Get the table and all its rows
+        const table = document.getElementById('stall_allocationtable');
+        const rows = table.getElementsByTagName('tr');
+        
+        // Loop through all rows
+        for (let i = 1; i < rows.length; i++) {  // Start from 1 to skip the header row
+            const cells = rows[i].getElementsByTagName('td');
+            
+            let rowContainsSearchTerm = false;
+            
+            // Loop through each cell in the row
+            for (let j = 0; j < cells.length; j++) {
+                // If the cell contains the search term, mark the row as matching
+                if (cells[j].textContent.toLowerCase().includes(searchInput)) {
+                    rowContainsSearchTerm = true;
+                    break;
+                }
+            }
+
+            // Show or hide the row based on whether it matches the search term
+            if (rowContainsSearchTerm) {
+                rows[i].style.display = '';
+            } else {
+                rows[i].style.display = 'none';
+            }
+        }
+    }
+
+    // Function to update the number of rows displayed based on selected entries per page
+    function updateEntriesPerPage() {
+        const entriesPerPage = parseInt(document.getElementById('entriesPerPage').value);
+        const table = document.getElementById('stall_allocationtable');
+        const rows = table.getElementsByTagName('tr');
+        
+        // Calculate the total number of rows to display, excluding the header row
+        const totalRows = rows.length - 1;
+        
+        // Loop through all rows and hide/show based on the selected entries per page
+        for (let i = 1; i <= totalRows; i++) {
+            if (i <= entriesPerPage) {
+                rows[i].style.display = '';  // Show the row
+            } else {
+                rows[i].style.display = 'none';  // Hide the row
+            }
+        }
+    }
+    
+    // Initialize the table with the selected entries per page
+    window.onload = function() {
+        updateEntriesPerPage();
+    };
+
+ 
+        </script>
+
+
+    
+
+
+        <!-- Footer -->
+        <div class="footer mt-4">
+            <p>Application by <a href="#" class="text-primary">Pixous Technologies</a></p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</body>
+</html>

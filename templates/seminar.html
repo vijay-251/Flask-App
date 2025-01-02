@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>EOL Report - Sign Up</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body, html {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 600px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .vis {
+            background: linear-gradient(to left, #040e56, #006b5d);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .inputbox {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .inputbox label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .inputbox input,
+        .inputbox select {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+        }
+        .button-row button {
+            flex: 0 0 auto; /* Prevent the button from stretching */
+            width: 120px; /* Set a fixed width */
+            padding: 8px;
+            font-size: 14px;
+            text-align: center;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            }
+
+            .button-row a {
+            flex: 0 0 auto; /* Prevent the link from stretching */
+            width: 120px; /* Set a fixed width */
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+            text-decoration: none;
+            background: #6c757d;
+            color: white;
+            border-radius: 5px;
+            display: inline-block;
+            text-align: center;
+            }
+
+            .button-row button.cancel {
+            background: #dc3545;
+            color: white;
+            margin-left: 150px;
+            }
+            .logo img {
+            max-width: 220px;
+            margin-bottom: 20px;
+            }
+            .app{
+             background: linear-gradient(to left, #040e56, #006b5d);
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 12px;
+            margin-top: 20px;
+            padding: 10px;
+
+        }
+          /* Media Queries for Responsiveness */
+    @media (max-width: 768px) {
+        .input-row {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .button-row {
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .button-row button,
+        .button-row a {
+            width: 100%; /* Full width for buttons and links */
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 15px;
+        }
+
+        .vis {
+            font-size: 16px;
+            padding: 8px;
+        }
+
+        .inputbox label {
+            font-size: 13px;
+        }
+
+        .inputbox input,
+        .inputbox select {
+            padding: 6px;
+            font-size: 13px;
+        }
+
+        .button-row button,
+        .button-row a {
+            font-size: 13px;
+        }
+
+        .app {
+            font-size: 10px;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+       <center>   <img src="{{ url_for('static', filename='logo.png') }}" alt="logo"> </center>  
+        </div>
+        <div class="vis">SEMINAR ATTENDEE</div>
+        <div class="form-box">
+            <form method="POST" action="/seminar">
+                <!-- First and Last Name -->
+                <div class="input-row">
+                    <div class="inputbox">
+                        <label>First Name *</label>
+                        <input type="text" name="fn" required>
+                    </div>
+                    <div class="inputbox">
+                        <label>Last Name *</label>
+                        <input type="text" name="ln" required>
+                    </div>
+                </div>
+
+                <!-- Phone Number and Email -->
+                <div class="input-row">
+                    <div class="inputbox">
+                        <label>Phone Number *</label>
+                        <input type="tel" name="ph" pattern="\d{10}" maxlength="10" title="Phone number must be exactly 10 digits" required>
+                    </div>
+                    <div class="inputbox">
+                        <label>Email Address</label>
+                        <input type="email" name="email">
+                    </div>
+                </div>
+
+                <!-- Interested Sector and Seminar -->
+                <div class="input-row">
+                    <div class="inputbox">
+                        <label>Interested Sector *</label>
+                        <select id="is" name="is">
+                            <option value="">Select sector</option>
+                            <option value="Agriculture">Agriculture</option>
+                            <option value="Horticulture">Horticulture</option>
+                        </select>
+                    </div>
+                    <div class="inputbox">
+                        <label>Seminar *</label>
+                        <select id="semi" name="semi">
+                            <option value="">Select seminar</option>
+                            <option value="Sample Seminar Name">Sample Seminar Name</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Purpose of Participation -->
+                <div class="input-row">
+                    <div class="inputbox">
+                        <label>Purpose of Participation *</label>
+                        <input type="text" name="pv" required>
+                    </div>
+
+                <!-- Gender and Age -->
+                
+                    <div class="inputbox">
+                        <label>Gender</label>
+                        <select id="gender" name="gender">
+                            <option value="">Select gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="inputbox">
+                        <label>Age</label>
+                        <input type="text" name="age">
+                    </div>
+
+                <!-- State and District -->
+              
+                    <div class="inputbox">
+                        <label>State</label>
+                        <input type="text" name="state">
+                    </div>
+                </div>
+                <div class="input-row">
+
+                    <div class="inputbox">
+                        <label>District</label>
+                        <input type="text" name="dis">
+                    </div>
+                
+
+                <!-- How Did You Hear About -->
+                <div class="inputbox">
+                    <label>How did you hear about the exhibition?</label>
+                    <select id="cmt" name="cmt">
+                        <option value="">Select option</option>
+                        <option value="Advertisement">Advertisement</option>
+                        <option value="email">Email</option>
+                        <option value="referral">Referral</option>
+                        <option value="Social Media">Social Media</option>
+                        <option value="others">Others</option>
+                    </select>
+                </div>
+            </div>
+
+                <p style="color: red;">{{error}}</p>
+
+                    <!-- Buttons -->
+                    <div class="button-row">
+                        <a href="/" class="back">Back</a>
+         
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                    <div class="app">Application by <a href="https://pixoustech.com/" class="pt" id="restore-btn">Pixous Technologies </a></div>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const submitButton = document.querySelector('button[type="submit"]');
+    
+            submitButton.addEventListener('click', (event) => {
+                // Show confirmation alert
+                const confirmRegistration = confirm("Confirmation\nAre you sure you want to register?");
+                
+                // If user selects "No", prevent form submission
+                if (!confirmRegistration) {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

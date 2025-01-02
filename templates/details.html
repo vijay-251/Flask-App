@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Details</title>
+    <style>
+        body, html {
+
+            margin: 0;
+            font-family: 'Times New Roman', Times, serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f7f7f7;
+        }
+
+        .box {
+            width: 600px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo img {
+            max-width: 220px;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .vis {
+            background: linear-gradient(to left, #040e56, #006b5d);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .input-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .inputbox {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+
+        .inputbox label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .inputbox input,
+        .inputbox select {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            background-color: rgb(225, 222, 222);
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .button-row a {
+             width: 80px;
+            padding: 10px;
+            text-align: center;
+            font-size: 20px;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            background: #a10615;
+            margin-bottom: 20px;
+            margin-left: 20px;
+        }
+
+        .edit {
+            width: 80px;
+            padding: 10px;
+            text-align: center;
+            font-size: 20px;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            background: #a10615;
+            margin-bottom: 20px;
+            margin-left: 200px;
+        }
+
+        .scanner-img img {
+            max-width: 180px;
+            height: auto;
+            margin-left: 60px;
+        }
+
+        .visno {
+            color: rgb(13, 13, 95);
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 1px;
+        }
+
+        .app {
+            background: linear-gradient(to left, #040e56, #006b5d);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            font-size: 14px;
+            margin-top: 30px;
+            padding: 10px;
+        }
+
+        .app a {
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Flexbox for left and right content */
+        .left, .right {
+            flex: 1;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .right {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .box {
+                width: 100%;
+                padding: 15px;
+            }
+
+            .container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .edit {
+                width: 100px;
+                font-size: 16px;
+                margin-left: auto;
+                margin-right: auto;
+                margin-top: 5px;
+            }
+
+            .left, .right {
+                flex: 1;
+                width: 100%;
+            }
+
+            .scanner-img {
+                display: flex;
+                justify-content: center;
+            }
+
+            .scanner-img img {
+                max-width: 120px;
+                margin-left: 0;
+            }
+
+            .visno {
+                font-size: 16px;
+            }
+
+           
+
+            .inputbox label {
+                font-size: 12px;
+            }
+
+            .inputbox input {
+                font-size: 12px;
+                padding: 10px;
+            }
+
+            .button-row {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .button-row a {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .app {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="logo">
+        </div>
+        <div class="vis">VISITOR DETAILS</div>
+        <form action="/register" method="POST">
+            <div class="container">
+                <div class="left">
+                    <div class="scanner-img">
+                            <img src="{{ url_for('static', filename='images/visitor_' + visitor['visitor_id'] + '_qr.png') }}" alt="Visitor QR Code">                        
+                        <div class="visno">{{ visitor['visitor_id'] }}</div>
+                    </div>
+                    <div class="inputbox">
+                        <label>Phone Number</label>
+                        <input type="tel" name="ph" value="{{ visitor['phone'] }}" readonly>
+                    </div>
+                    <div class="inputbox">
+                        <label>Visitor of Category</label>
+                        <input type="text" name="vs" value="{{ visitor['category']}}">
+                    </div>
+                    <div class="inputbox">
+                        <label>State</label>
+                        <input type="text" name="state" value="{{ visitor['state'] }}" readonly>
+                    </div>
+                    <div class="inputbox">
+                        <label>Gender</label>
+                        <input type="text" name="gender" value="{{ visitor['gender'] }}" readonly>
+                    </div>
+                    <div class="inputbox">
+                        <label>How did you hear about the exhibition?</label>
+                        <input type="text" name="cmt" value="{{ visitor['cmt'] }}">
+                    </div>
+                </div>
+
+                <div class="right">
+               
+                    <div class="inputbox">
+                        <label>First Name</label>
+                        <input type="text" name="fn" value="{{ visitor['fname'] }}" readonly>
+                    </div>
+                    <div class="inputbox">
+                        <label>Last Name</label>
+                        <input type="text" name="ln" value="{{ visitor['lname'] }}" readonly>
+                    </div>
+                    <div class="inputbox">
+                        <label>Email Address</label>
+                        <input type="email" name="email" value="{{ visitor['email'] }}" readonly>
+                    </div>
+                    <div class="inputbox">
+                        <label>Purpose of Visit</label>
+                        <input type="text" name="purpose" value="{{ visitor['visit'] }}">
+                    </div>
+                    <div class="inputbox">
+                        <label>Category</label>
+                        <input type="text" name="category" value="{{ visitor['category'] }}" readonly>
+                    </div>
+                    <div class="inputbox">
+                        <label>District</label>
+                        <input type="text" name="district" value="{{ visitor['district'] }}" readonly>
+                    </div>
+                    <div class="inputbox">
+                        <label>Age</label>
+                        <input type="text" name="age" value="{{ visitor['age'] }}" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="button-row">
+                <a href="javascript:history.back()">Back</a>
+                <button type="submit" class="edit">Edit</button>
+            </div>
+        </form>
+        <div class="app">
+            Application by <a href="/pixous">Pixous Technologies</a>
+        </div>
+    </div>
+</body>
+</html>

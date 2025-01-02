@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Page Registration Panel</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        /* Topbar Styles */
+.topbar {
+    background-color: #06568E;
+    color: white;
+    padding: 10px 15px; /* Left and right padding */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 10px; /* Gap above */
+    border-radius: 10px; /* Rounded corners */
+    width: 98%; /* Set width to 80% of the viewport width */
+    margin-left: auto; /* Center horizontally */
+    margin-right: auto; /* Center horizontally */
+    font-weight: bold;
+    font-size: 20px;
+}
+.dataTables_wrapper {
+    width: 100%;
+    overflow-x: auto; /* Allow horizontal scrolling */
+}
+
+.dataTables_scrollBody {
+    overflow-x: auto !important;
+}
+
+table.dataTable {
+    width: 100% !important; /* Ensure table stretches to full width for horizontal scrolling */
+    white-space: nowrap;    /* Prevent text wrapping in table cells */
+}
+
+
+        /* Sidebar Styles */
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            width: 250px;
+            padding: 20px;
+        }
+        .sidebar h4 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+        .sidebar a:hover {
+            background-color: #004080;
+            color: white;
+            border-radius: 10px;
+        }
+        .sidebar a.active {
+    background-color: #004080;
+    color: white;
+    border-radius: 10px;
+}
+
+        
+       /* Main Content Styles */
+.main-content {
+    margin-left: 250px; /* Sidebar width */
+    margin-top: 10px; /* Topbar height */
+    height: 100%; /* Take up full height */
+    padding: 20px;
+line-height: 21.02px;
+text-align: left;
+text-underline-position: from-font;
+text-decoration-skip-ink: none;
+
+}
+
+/* Content Area */
+.content-area {
+    padding: 20px;
+    overflow-y: auto; /* Enable scrolling within the content */
+}
+
+        /* Table Styling */
+        table.dataTable thead {
+            background-color: #06568E;
+            color: white;
+        }
+        .table a {
+            text-decoration: none;
+            color: #003366;
+            font-weight: bold;
+        }
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #e9ecef;
+        }
+        .footer a {
+            text-decoration: none;
+            color: #003366;
+        }
+        .dataTables_filter {
+            margin-bottom: 15px;
+        }
+
+        .dataTables_filter label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            .main-content {
+                margin-left: 200px;
+            }
+        }
+        .sidebar img {
+            width: 180px;
+            margin: 0 auto 20px;
+        }
+        /* Filters Section */
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    .filter-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-item {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+/* Layout adjustments for top section */
+.dataTables_wrapper .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px; /* Add spacing below the top section */
+}
+
+/* Left section: Entries and Buttons */
+.dataTables_wrapper .left-section {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Space between dropdown and buttons */
+}
+
+/* Right section: Search */
+.dataTables_wrapper .right-section {
+    margin-left: auto; /* Push search to the right */
+    display: flex;
+    align-items: center;
+}
+
+
+/* Custom button styling */
+/* Custom Excel Button */
+.custom-excel-btn {
+    background-color: #06568E !important; /* Set background color */
+    color: white !important;            /* Set text color */
+    border-radius: 10px;
+}
+
+/* Custom PDF Button */
+.custom-pdf-btn {
+    background-color: #06568E !important; /* Set background color */
+    color: white !important;   
+    border-radius: 10px;         /* Set text color */  /* Match border color */
+}
+
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dataTables_wrapper .top {
+        flex-wrap: wrap; /* Stack elements on smaller screens */
+    }
+    .dataTables_wrapper .left-section,
+    .dataTables_wrapper .right-section {
+        margin-bottom: 10px;
+        justify-content: center;
+    }
+}
+
+
+
+    </style>
+</head>
+<body>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="logo">
+        <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="{{ url_for('registration') }}"><i class="fas fa-user-plus"></i> Registration</a>
+        <a href="{{ url_for('stall_allocation') }}"><i class="fas fa-th"></i> Stall Allocation</a>
+        <a href="#" id="reportToggle" class="dropdown-toggle"><i class="fas fa-chart-bar"></i> Report</a>
+       <div id="reportDropdown" style="display: none;">
+                <ul class="list-unstyled">
+                    <li><a href="{{ url_for('visitor_report') }}">Visitor</a></li>
+                    <li><a href="/seminar_report">Seminar Attendees</a></li>
+                    <li><a href="/exhibitor_report">Exhibitors</a></li>
+                    <li><a href="/others_report">Others</a></li>
+                </ul>
+            </div>
+       <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="topbar">
+            <div class="left">Registrations</div>
+            <div class="right">
+               <span>Welcome
+                     Admin</span>
+                     <a href="{{ url_for('admin_login') }}">
+                        <i class="fas fa-user-circle"></i>
+                    </a><!-- Bootstrap Icon -->
+              
+            </div>
+        </div>
+        <!-- Content Area -->
+        <!-- <div class="content-area"> -->
+            <!-- Breadcrumb -->
+            <!-- <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">Home</li>
+                    <li class="breadcrumb-item active" aria-current="page">Registration</li>
+                </ol>
+            </nav> -->
+
+            <!-- Filters -->
+              <!-- Filter Form: Dropdown to select Registration Type -->
+              <form method="POST" action="/registration">
+                <div class="filter-container d-flex justify-content-between">
+                    <!-- Registration Type Filter -->
+                    <div class="filter-item flex-fill me-3">
+                        <label for="registrationtype" class="form-label"></label>
+                        <select id="registrationtype" name="registrationtype" class="form-select" onchange="this.form.submit()">
+                            <option value="">All Types</option>
+                            {% for type in registrationtypes %}
+                                <option value="{{ type['RegistrationType'] }}"
+                                    {% if request.form['registrationtype'] == type['RegistrationType'] %}selected{% endif %}>
+                                    {{ type['RegistrationType'] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+            
+                    <!-- State Filter -->
+                    <div class="filter-item flex-fill me-3">
+                        <label for="state" class="form-label"></label>
+                        <select id="state" name="state" class="form-select" onchange="this.form.submit()">
+                            <option value="">All States</option>
+                            {% for state in states %}
+                                <option value="{{ state['DropDownValue'] }}"
+                                    {% if request.form['state'] == state['DropDownValue'] %}selected{% endif %}>
+                                    {{ state['DropDownValue'] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+            
+                    <!-- District Filter -->
+                    <div class="filter-item flex-fill">
+                        <label for="district" class="form-label"></label>
+                        <select id="district" name="district" class="form-select" onchange="this.form.submit()">
+                            <option value="">All Districts</option>
+                            {% for district in districts %}
+                                <option value="{{ district['DropDownValue'] }}"
+                                    {% if request.form['district'] == district['DropDownValue'] %}selected{% endif %}>
+                                    {{ district['DropDownValue'] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </form>
+            
+            
+            
+            
+
+            <!-- Buttons -->
+           <!-- Include DataTables export buttons libraries -->
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.4/css/buttons.dataTables.min.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/2.3.4/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/2.3.4/js/buttons.html5.min.js"></script>
+
+
+            <div class="table-responsive">
+                <table id="registrationTable" class="row-border">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox"></th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Registration Number</th>
+                            <th>Registration Type</th>
+                            <th>Email Address</th>
+                            <th>Phone</th>
+                            <th>Gender</th>
+                            <th>State</th>
+                            <th>District</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                        {% for registration in registrations %}
+                            <tr>
+                                <td><input type="checkbox"></td>
+                                <td>{{ registration['FirstName'] }}</td>
+                                <td>{{ registration['LastName'] }}</td>
+                                <td><a href="{{ url_for('visitor_details', registration_no=registration['RegistrationNo']) }}">{{ registration['RegistrationNo'] }}</a></td>
+                                <td>{{ registration['RegistrationType'] }}</td>
+                                <td>{{ registration['Email'] }}</td>
+                                <td>{{ registration['Phone'] }}</td>
+                                <td>{{ registration['Gender'] }}</td>
+                                <td>{{ registration['State'] }}</td>
+                                <td>{{ registration['District'] }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="10" class="text-center">No records found</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <script>
+    $(document).ready(function() {
+    $('#registrationTable').DataTable({
+        "paging": true,               // Enable pagination
+        "searching": true,            // Enable search box
+        "info": false,                // Remove the "Showing x to y of z entries" text
+        "lengthChange": true,         // Keep the page length dropdown
+        "pageLength": 10,             // Set default page length
+        "responsive": true,           // Make the table responsive
+        "scrollX": true,   
+        dom: '<"top d-flex align-items-center justify-content-between"<"left-section"lB><"right-section"f>>rt<"bottom"p><"clear">', // Layout configuration
+        language: {
+            lengthMenu: 'Entries <select>' +
+                '<option value="5">5</option>' +
+                '<option value="10">10</option>' +
+                '<option value="25">25</option>' +
+                '<option value="50">50</option>' +
+                '</select>'
+        },
+        buttons: [
+            {
+                extend: 'excelHtml5',
+                text: ' Excel',
+                className: 'btn btn-primary custom-excel-btn'  // Custom class for buttons
+            },
+            {
+                extend: 'pdfHtml5',
+                text: 'PDF',
+                className: 'btn btn-primary custom-pdf-btn'  // Blue color for PDF button
+            }
+        ]
+    });
+
+    // Center the pagination controls
+    $('div.dataTables_paginate').addClass('d-flex justify-content-center');
+});
+
+
+        
+            // Get the reportToggle and reportDropdown elements
+    const reportToggle = document.getElementById('reportToggle');
+    const reportDropdown = document.getElementById('reportDropdown');
+
+    // Add a click event to toggle the visibility of the reportDropdown
+    reportToggle.addEventListener('click', function() {
+        // Toggle the display of the dropdown menu
+        if (reportDropdown.style.display === 'none' || reportDropdown.style.display === '') {
+            reportDropdown.style.display = 'block';
+        } else {
+            reportDropdown.style.display = 'none';
+        }
+    });
+    function openExcel() {
+      window.location.href = "path/to/your/excelfile.xlsx";  // Replace with your file path
+    }
+    </script>
+
+           
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Application by <a href="#">Pixous Technologies</a></p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    
+
+</body>
+</html>

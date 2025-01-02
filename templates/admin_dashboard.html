@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+           body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background-color: #004080;
+            color: white;
+            border-radius: 10px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            padding: 15px 20px;
+            font-size: 16px;
+            display: block;
+        }
+        .sidebar img {
+            width: 180px;
+            margin: 0 auto 20px;
+        }
+        .top-bar {
+        display: flex;
+        justify-content: space-between; /* Ensures space between search bar and icons */
+        align-items: center;
+        padding: 10px 20px;
+        width: 100%;
+        position: relative;
+    }
+
+    .top-bar .search-bar {
+        display: flex;
+        align-items: center;
+    }
+
+    .top-bar .search-bar input {
+        border: none;
+        border-radius: 20px;
+        padding: 5px 10px;
+        margin-right: 10px;
+        outline: none;
+    }
+
+    .top-bar .icons {
+        display: flex;
+        align-items: center;
+        margin-left: auto; /* Pushes the icons to the right */
+    }
+
+    .top-bar .icons i {
+        margin-left: 15px; /* Space between the icons */
+        cursor: pointer;
+        font-size: 1.5rem; /* Adjust size of icons */
+    }
+    .content-header {
+    display: flex;
+    justify-content: space-between; /* Space between the title and print button */
+    align-items: center;
+    margin: 20px;
+}
+
+.content-header h1 {
+    font-size: 1.8rem;
+}
+
+.content-header .btn {
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+}
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                left: -250px;
+                transition: 0.3s;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .content {
+                margin-left: 0;
+            }
+
+            
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .card h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+            .chart-container {
+                background-color: #fff;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                min-height: 250px; /* Ensure consistency in chart sizes */
+            }
+        .container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+    
+        .dashboard-stats .card {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .dashboard-stats .card h3 {
+            font-size: 24px;
+            color: #06568E;
+        }
+
+        .dashboard-stats .card p {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .dropdown-menu {
+            background-color: #06568E;
+            border: none;
+        }
+
+        .dropdown-menu a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #054a73;
+        }
+        canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+.registration-box {
+    background-color: #06568E; /* Set the background color to #06568E */
+    color: white;             /* Text color white for the number */
+    border-radius: 8px;       /* Rounded corners */
+    padding: 10px 15px;       /* Add padding to the box */
+    width: 251px;             /* Set the width as per your requirement */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add some shadow for better visibility */
+    background-color: rgba(6, 86, 142, 0.8); /* Apply the rgba transparency (background color + opacity) */
+}
+
+.registration-box .fs-3 {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 sidebar p-3 d-none d-md-block">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="logo">
+                <a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="{{ url_for('registration') }}"><i class="fas fa-user-plus"></i> Registration</a>
+                <a href="{{ url_for('stall_allocation') }}"><i class="fas fa-th"></i> Stall Allocation</a>
+                <a href="#" id="reportToggle" class="dropdown-toggle"><i class="fas fa-chart-bar"></i> Report</a>
+    
+                <!-- Dropdown Menu (Initially Hidden) -->
+                <div id="reportDropdown" style="display: none;">
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('visitor_report') }}">Visitor</a></li>
+                        <li><a href="/seminar_report">Seminar Attendees</a></li>
+                        <li><a href="/exhibitor_report">Exhibitors</a></li>
+                        <li><a href="/others_report">Others</a></li>
+                    </ul>
+                </div>
+                <a href="{{url_for('admin_login')}}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Top Bar -->
+                <div class="top-bar">
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="Search..." onkeyup="filterDashboard()">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <!-- Icons on the right -->
+                    <div class="icons">
+                        <i class="fas fa-bell"></i>
+                        <a href="{{ url_for('admin_login') }}">
+                            <i class="fas fa-user-circle"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="content-header">
+                    <h1 class="text-primary">Dashboard</h1>
+                    <button class="btn btn-primary" onclick="window.print();">Print</button>
+                </div>
+                
+                
+
+                <!-- Total Registration -->
+                <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded shadow-sm mb-4">
+                    <h2 class="text-primary">Total Registrations</h2>
+                    <div class="registration-box">
+                        <div class="fs-3 fw-bold text-white">{{ total_registrations }}</div>
+                    </div>
+                </div>
+                
+
+                <!-- Stats Cards -->
+               <!-- Ensure Bootstrap's Grid System for Consistent Layout -->
+<div class="container-fluid">
+    <div class="row g-4">
+        <!-- Stats Section -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card">
+                <h3>Visitors</h3>
+                <p>{{ visitors }}</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card">
+                <h3>Seminar Attendees</h3>
+                <p>{{ seminar_attendees }}</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card">
+                <h3>Exhibitors</h3>
+                <p>{{ exhibitors }}</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card">
+                <h3>Others</h3>
+                <p>{{ others }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-4">
+        <!-- Row 1: Total Registration Chart, Stalls Booked, and New Registrations -->
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <h3>Total Registration</h3>
+                    <canvas id="registrationBarChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="chart-container">
+                    <h3>Exhibitor Registrations</h3>
+                    <canvas id="exhibitorPieChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="card text-center" style="background-color: #006D5D; color: #fff; border: none;">
+                    <div class="card-body">
+                        <h3>New Registrations Today</h3>
+                        <p id="newRegistrationsCount" style="font-size: 24px; font-weight: bold;">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Row 2: Gender Distribution, Exhibitor Registrations, and Age-wise Registrations -->
+        <div class="row g-4 mt-3">
+            <div class="col-lg-4">
+                <div class="chart-container">
+                    <h3>Gender Distribution</h3>
+                    <canvas id="genderDonutChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-container">
+                    <h3>Stalls Booked</h3>
+                    <canvas id="stallBookedPieChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="chart-container">
+                    <h3>Age-wise Registrations</h3>
+                    <canvas id="ageBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+              
+                
+                
+    
+    <script>
+          fetch('/data/registrations')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error fetching registration data:', data.error);
+                return;
+            }
+
+            const registrationBarData = {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Total Registrations',
+                    data: data.counts,
+                    backgroundColor: ['#3F51B5', '#00BCD4', '#8BC34A', '#FFC107']
+                }]
+            };
+
+            new Chart(document.getElementById('registrationBarChart'), {
+                type: 'bar',
+                data: registrationBarData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error:', error));
+
+        
+
+            // Fetch the gender data from the backend
+            fetch('/data/gender')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Data fetched:', data); // Log fetched data for debugging
+
+        if (!data.labels || !data.counts || !Array.isArray(data.labels) || !Array.isArray(data.counts)) {
+            throw new Error('Invalid data structure. Ensure "labels" and "counts" are arrays.');
+        }
+
+        const ctx = document.getElementById('genderDonutChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.labels, // Example: ['Male', 'Female', 'Transgender']
+                datasets: [{
+                    data: data.counts, // Example: [300, 500, 200]
+                    backgroundColor: ['#3366CC', '#DC3912', '#FF9900']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (tooltipItem) {
+                                return `${tooltipItem.label}: ${tooltipItem.raw} registrations`;
+                            }
+                        }
+                    }
+                },
+                cutout: '50%', // Center cutout for donut chart
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to load the gender data. Please check the console for more details.');
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    // Fetch the data for the exhibitor pie chart
+    fetch('/data/exhibitor')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Exhibitor Data:', data); // Debug fetched data
+
+            if (!data.status || !Array.isArray(data.status)) {
+                throw new Error('Invalid data structure. Ensure "status" is an array.');
+            }
+
+            // Count the occurrences of the status values (1 for approved, -1 for rejected)
+            const approvedCount = data.status.filter(status => status === 1).length;
+            const rejectedCount = data.status.filter(status => status === -1).length;
+
+            // Ensure the canvas element exists before trying to access it
+            const ctx = document.getElementById('exhibitorPieChart');
+            if (!ctx) {
+                console.error("Canvas element not found!");
+                return;
+            }
+
+            // Create the pie chart
+            new Chart(ctx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Approved', 'Rejected'],
+                    datasets: [{
+                        data: [approvedCount, rejectedCount], // Counts of approved and rejected
+                        backgroundColor: ['#3366CC', '#DC3912'] // Blue for approved, red for rejected
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (tooltipItem) {
+                                    return `${tooltipItem.label}: ${tooltipItem.raw} exhibitors`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to load the exhibitor data. Please check the console for more details.');
+        });
+});
+
+
+fetch('/data/stall_booked_chart')
+    .then(response => response.json())
+    .then(data => {
+        // Check if the data structure is valid
+        if (!data.labels || !data.counts || !Array.isArray(data.labels) || !Array.isArray(data.counts)) {
+            throw new Error('Invalid data structure. Ensure "labels" and "counts" are arrays.');
+        }
+
+        // Create the pie chart
+        const ctx = document.getElementById('stallBookedPieChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: data.labels, // Example: ['Booked', 'Available']
+                datasets: [{
+                    data: data.counts, // Example: [100, 50]
+                    backgroundColor: ['#FF9900', '#006D5D'], // Colors for booked and available
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.label}: ${tooltipItem.raw} stalls`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching stall booked data:', error);
+        alert('Failed to load the stall booked data. Please check the console for more details.');
+    });
+
+
+    // Fetch age-wise registration data
+fetch('/data/age_registration')
+    .then(response => response.json())
+    .then(data => {
+        // Prepare labels and data for the chart
+        const ageGroups = data.map(item => item.age_group);
+        const ageCounts = data.map(item => item.count);
+
+        // Render the bar chart
+        const ctx = document.getElementById('ageBarChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ageGroups,
+                datasets: [{
+                    label: 'Registrations',
+                    data: ageCounts,
+                    backgroundColor: '#006D5D'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Age Group'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Registrations'
+                        }
+                    }
+                }
+            }
+        });
+    })
+    .catch(error => console.error('Error fetching age data:', error));
+
+    
+    document.addEventListener('DOMContentLoaded', function() {
+    fetch('/data/new_registrations')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Data fetched:', data);  // Log data for debugging
+            
+            if (data && data.new_registrations !== undefined) {
+                console.log('New registrations:', data.new_registrations);  // Debug log
+                document.getElementById("newRegistrationsCount").innerText = data.new_registrations;
+            } else {
+                console.error('Error: New registrations data is missing or malformed');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching new registrations:', error);
+            alert('Failed to load new registrations data.');
+        });
+});
+
+
+            
+    const reportToggle = document.getElementById('reportToggle');
+    const reportDropdown = document.getElementById('reportDropdown');
+
+    // Add a click event to toggle the visibility of the reportDropdown
+    reportToggle.addEventListener('click', function() {
+        // Toggle the display of the dropdown menu
+        if (reportDropdown.style.display === 'none' || reportDropdown.style.display === '') {
+            reportDropdown.style.display = 'block';
+        } else {
+            reportDropdown.style.display = 'none';
+        }
+    });
+    </script>
+</body>
+
+</html>

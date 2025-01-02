@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+        .form-container {
+            width: 400px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            font-family: Arial, sans-serif;
+        }
+        .logo {
+            text-align: center;
+            padding: 20px;
+        }
+        .logo img {
+            max-width: 200px;
+        }
+        .form-header {
+            background: linear-gradient(to right, #040e56, #006b5d);
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 18px
+        }
+        .button {
+            width: 80%;
+            margin: 15px auto;
+            background: #adaaaa;
+            color: black;
+            text-align: center;
+            padding: 15px 0;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+        .button:hover {
+            background: #999999;
+        }
+        .footer-link {
+            text-align: center;
+            margin: 18px 0;
+            font-size: 15px;
+        }
+        .footer-link a {
+            color: #006b5d;
+            text-decoration: none;
+        }
+        .footer-link a:hover {
+            text-decoration: underline;
+        }
+        .app-footer {
+            background: linear-gradient(to left, #040e56, #006b5d);
+            color: white;
+            text-align: center;
+            padding: 14px 0;
+            font-size: 12px;
+        }
+        .app-footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .app-footer a {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <!-- Logo Section -->
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="logo">
+        </div>
+
+        <!-- Form Header -->
+        <div class="form-header">REGISTRATION FORM</div>
+
+        <!-- Buttons -->
+        <a href="/visitor" class="button">Visitor</a>
+        <a href="/seminar" class="button">Seminar Attendee</a>
+        <a href="/exhibitor" class="button">Exhibitor</a>
+        <a href="/others" class="button">Others</a>
+
+        <!-- Already Registered Link -->
+        <div class="footer-link">
+            <a href="/register">Already registered?</a>
+        </div>
+
+        <!-- Footer -->
+        <div class="app-footer">
+            <a href="https://pixoustech.com/">Application by Pixous Technologies</a>
+        </div>
+    </div>
+</body>
+</html>
