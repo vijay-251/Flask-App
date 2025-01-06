@@ -290,7 +290,7 @@
                     <h3>Exhibitor Registrations</h3>
                     <canvas id="exhibitorPieChart"></canvas>
                 </div>
-            </div>
+            </div>            
             <div class="col-lg-3">
                 <div class="card text-center" style="background-color: #006D5D; color: #fff; border: none;">
                     <div class="card-body">
@@ -305,16 +305,16 @@
         <div class="row g-4 mt-3">
             <div class="col-lg-4">
                 <div class="chart-container">
-                    <h3>Gender Distribution</h3>
-                    <canvas id="genderDonutChart"></canvas>
+                  <h3>Gender Distribution</h3>
+                  <canvas id="multiRingChart"></canvas>
                 </div>
-            </div>
-            <div class="col-lg-4">
+              </div>
+              <div class="col-lg-4">
                 <div class="chart-container">
                     <h3>Stalls Booked</h3>
-                    <canvas id="stallBookedPieChart"></canvas>
+                    <canvas id="stallBookedPieChart"></canvas> <!-- Canvas for the doughnut chart -->
                 </div>
-            </div>
+            </div>            
             <div class="col-lg-4">
                 <div class="chart-container">
                     <h3>Age-wise Registrations</h3>
@@ -328,47 +328,8 @@
                 
     
     <script>
-          fetch('/data/registrations')
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error('Error fetching registration data:', data.error);
-                return;
-            }
-
-            const registrationBarData = {
-                labels: data.labels,
-                datasets: [{
-                    label: 'Total Registrations',
-                    data: data.counts,
-                    backgroundColor: ['#3F51B5', '#00BCD4', '#8BC34A', '#FFC107']
-                }]
-            };
-
-            new Chart(document.getElementById('registrationBarChart'), {
-                type: 'bar',
-                data: registrationBarData,
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        })
-        .catch(error => console.error('Error:', error));
-
-        
-
-            // Fetch the gender data from the backend
-            fetch('/data/gender')
+   // Fetch the registration data from the backend
+fetch('/data/registrations')  // Use relative path for simplicity
     .then(response => {
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -376,47 +337,122 @@
         return response.json();
     })
     .then(data => {
-        console.log('Data fetched:', data); // Log fetched data for debugging
-
-        if (!data.labels || !data.counts || !Array.isArray(data.labels) || !Array.isArray(data.counts)) {
-            throw new Error('Invalid data structure. Ensure "labels" and "counts" are arrays.');
+        if (data.error) {
+            console.error('Error fetching registration data:', data.error);
+            return;
         }
 
-        const ctx = document.getElementById('genderDonutChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: data.labels, // Example: ['Male', 'Female', 'Transgender']
-                datasets: [{
-                    data: data.counts, // Example: [300, 500, 200]
-                    backgroundColor: ['#3366CC', '#DC3912', '#FF9900']
-                }]
-            },
+        const registrationLineData = {
+            labels: data.labels,  // Example: ['Visitor', 'Seminar Attendee', 'Exhibitor', 'Others']
+            datasets: [{
+                label: 'Total Registrations',
+                data: data.counts,  // Example: [150, 200, 50, 20]
+                fill: false,  // No fill under the line
+                borderColor: 'rgb(75, 192, 192)',  // Line color
+                tension: 0.1  // Smoothness of the line
+            }]
+        };
+
+        // Create the line chart
+        new Chart(document.getElementById('registrationBarChart'), {
+            type: 'line',  // Change type to 'line' for a line chart
+            data: registrationLineData,
             options: {
                 responsive: true,
                 plugins: {
                     legend: {
-                        position: 'bottom',
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (tooltipItem) {
-                                return `${tooltipItem.label}: ${tooltipItem.raw} registrations`;
-                            }
-                        }
+                        display: true  // Show legend
                     }
                 },
-                cutout: '50%', // Center cutout for donut chart
+                scales: {
+                    y: {
+                        beginAtZero: true  // Start y-axis from 0
+                    }
+                }
             }
         });
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to load the gender data. Please check the console for more details.');
+        alert('Failed to load registration data. Please check the console for more details.');
     });
 
-    document.addEventListener('DOMContentLoaded', function() {
-    // Fetch the data for the exhibitor pie chart
+        
+// Fetch the gender data from the backend
+// Fetch the gender data from the backend
+// Fetch the gender data from the backend
+fetch('/data/gender')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Data fetched:', data);
+
+    if (!data.labels || !data.counts || !Array.isArray(data.labels) || !Array.isArray(data.counts)) {
+      throw new Error('Invalid data structure. Ensure "labels" and "counts" are arrays.');
+    }
+
+    if (data.labels.length === 0 || data.counts.length === 0) {
+      throw new Error('No gender data available');
+    }
+
+    const ctx = document.getElementById('multiRingChart').getContext('2d');
+
+    // Create datasets with reduced ring radius
+    const datasets = data.counts.map((count, index) => ({
+      label: data.labels[index],
+      data: [count, 0], // Full data for the ring
+      backgroundColor: [getBackgroundColor(index)], // Set color for the ring
+      hoverOffset: 4, // Hover effect
+      circumference: 360, // Ensure full circle
+      radius: `${70 + index * 30}%`, // Reduce radius dynamically for each ring
+    }));
+
+    // Create the Chart.js instance
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: data.labels,
+        datasets: datasets,
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+          },
+          tooltip: {
+            callbacks: {
+              label: function (tooltipItem) {
+                const label = tooltipItem.dataset.label || '';
+                const value = tooltipItem.raw;
+                return `${label}: ${value}`;
+              },
+            },
+          },
+        },
+        cutout: '0%', // Ensure full rings
+      },
+    });
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Failed to load the gender data. Please check the console for more details.');
+  });
+
+// Function to generate distinct colors for each ring
+function getBackgroundColor(index) {
+  const colors = ['#3366CC', '#DC3912', '#FF9900', '#109618', '#990099'];
+  return colors[index % colors.length];
+}
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Fetch the data for the exhibitor doughnut chart
     fetch('/data/exhibitor')
         .then(response => {
             if (!response.ok) {
@@ -427,13 +463,14 @@
         .then(data => {
             console.log('Exhibitor Data:', data); // Debug fetched data
 
-            if (!data.status || !Array.isArray(data.status)) {
-                throw new Error('Invalid data structure. Ensure "status" is an array.');
+            // Check that data.IsStallApprove exists and is an array
+            if (!data.IsStallApprove || !Array.isArray(data.IsStallApprove)) {
+                throw new Error('Invalid data structure. Ensure "IsStallApprove" is an array.');
             }
 
-            // Count the occurrences of the status values (1 for approved, -1 for rejected)
-            const approvedCount = data.status.filter(status => status === 1).length;
-            const rejectedCount = data.status.filter(status => status === -1).length;
+            // Count the occurrences of the status values (1 for approved, 0 for rejected)
+            const approvedCount = data.IsStallApprove.filter(status => status === 1).length;
+            const rejectedCount = data.IsStallApprove.filter(status => status === 0).length;
 
             // Ensure the canvas element exists before trying to access it
             const ctx = document.getElementById('exhibitorPieChart');
@@ -442,14 +479,14 @@
                 return;
             }
 
-            // Create the pie chart
+            // Create the doughnut chart
             new Chart(ctx.getContext('2d'), {
-                type: 'pie',
+                type: 'doughnut', // Doughnut chart type
                 data: {
                     labels: ['Approved', 'Rejected'],
                     datasets: [{
                         data: [approvedCount, rejectedCount], // Counts of approved and rejected
-                        backgroundColor: ['#3366CC', '#DC3912'] // Blue for approved, red for rejected
+                        backgroundColor: ['#3366CC', '#DC3912'], // Blue for approved, red for rejected
                     }]
                 },
                 options: {
@@ -461,11 +498,14 @@
                         tooltip: {
                             callbacks: {
                                 label: function (tooltipItem) {
-                                    return `${tooltipItem.label}: ${tooltipItem.raw} exhibitors`;
+                                    const label = tooltipItem.label || '';
+                                    const value = tooltipItem.raw || 0;
+                                    return `${label}: ${value} exhibitors`;
                                 }
                             }
                         }
-                    }
+                    },
+                    cutout: '50%', // Hole size in the center
                 }
             });
         })
@@ -484,10 +524,10 @@ fetch('/data/stall_booked_chart')
             throw new Error('Invalid data structure. Ensure "labels" and "counts" are arrays.');
         }
 
-        // Create the pie chart
+        // Create the doughnut chart
         const ctx = document.getElementById('stallBookedPieChart').getContext('2d');
         new Chart(ctx, {
-            type: 'pie',
+            type: 'doughnut', // Set the chart type to doughnut
             data: {
                 labels: data.labels, // Example: ['Booked', 'Available']
                 datasets: [{
@@ -499,16 +539,17 @@ fetch('/data/stall_booked_chart')
                 responsive: true,
                 plugins: {
                     legend: {
-                        position: 'bottom',
+                        position: 'bottom', // Legend at the bottom
                     },
                     tooltip: {
                         callbacks: {
                             label: function(tooltipItem) {
-                                return `${tooltipItem.label}: ${tooltipItem.raw} stalls`;
+                                return `${tooltipItem.label}: ${tooltipItem.raw} stalls`; // Tooltip with count info
                             }
                         }
                     }
-                }
+                },
+                cutout: '50%', // Define the hole size for the doughnut
             }
         });
     })
@@ -518,15 +559,22 @@ fetch('/data/stall_booked_chart')
     });
 
 
+
     // Fetch age-wise registration data
-fetch('/data/age_registration')
+    fetch('/data/age_registration')
     .then(response => response.json())
     .then(data => {
         // Prepare labels and data for the chart
         const ageGroups = data.map(item => item.age_group);
         const ageCounts = data.map(item => item.count);
 
-        // Render the bar chart
+        // Generate a color palette for the bars
+        const colors = [
+            '#006D5D', '#FF5733', '#FFC300', '#DAF7A6', '#9B59B6',
+            '#3498DB', '#1ABC9C', '#E74C3C', '#F1C40F', '#2ECC71'
+        ];
+
+        // Render the horizontal bar chart
         const ctx = document.getElementById('ageBarChart').getContext('2d');
         new Chart(ctx, {
             type: 'bar',
@@ -535,11 +583,13 @@ fetch('/data/age_registration')
                 datasets: [{
                     label: 'Registrations',
                     data: ageCounts,
-                    backgroundColor: '#006D5D'
+                    backgroundColor: colors,
+                    borderRadius: 10 // Adds rounded corners to the bars
                 }]
             },
             options: {
                 responsive: true,
+                indexAxis: 'y', // This makes the bar chart horizontal
                 plugins: {
                     legend: {
                         display: false
@@ -549,14 +599,14 @@ fetch('/data/age_registration')
                     x: {
                         title: {
                             display: true,
-                            text: 'Age Group'
-                        }
+                            text: 'Number of Registrations'
+                        },
+                        beginAtZero: true
                     },
                     y: {
-                        beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Number of Registrations'
+                            text: 'Age Group'
                         }
                     }
                 }
@@ -564,6 +614,8 @@ fetch('/data/age_registration')
         });
     })
     .catch(error => console.error('Error fetching age data:', error));
+
+
 
     
     document.addEventListener('DOMContentLoaded', function() {

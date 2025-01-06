@@ -150,22 +150,31 @@
                                 <select class="form-select me-2" id="genderDropdown" onchange="filterData()">
                                     <option value="">Select Gender</option>
                                     {% for gender in genders %}
-                                    <option value="{{ gender['dropdownvalue'] }}">{{ gender['dropdownvalue'] }}</option>
+                                        <option value="{{ gender['ID'] }}">{{ gender['dropdownvalue'] }}</option>
                                     {% endfor %}
                                 </select>
-
+                            
+                                <!-- Category Filter (Seminar Categories) -->
                                 <select class="form-select me-2" id="categoryDropdown" onchange="filterData()">
-                                    <option value="">Select Category</option>
-                                    <option value="Sample Seminar Name">Sample Seminar Name</option>
+                                    <option value="">Select Seminar</option>
                                     {% for category in categories %}
-                                    <option value="{{ category['dropdownvalue'] }}">{{ category['dropdownvalue'] }}</option>
+                                        <option value="{{ category['ID'] }}">{{ category['dropdownvalue'] }}</option>
                                     {% endfor %}
                                 </select>
-
-                                <select class="form-select" id="stateDropdown" onchange="filterData()">
+                            
+                                <!-- State Filter -->
+                                <select class="form-select me-2" id="stateDropdown" onchange="filterData()">
                                     <option value="">Select State</option>
                                     {% for state in states %}
-                                    <option value="{{ state['dropdownvalue'] }}">{{ state['dropdownvalue'] }}</option>
+                                        <option value="{{ state['ID'] }}">{{ state['dropdownvalue'] }}</option>
+                                    {% endfor %}
+                                </select>
+                            
+                                <!-- District Filter -->
+                                <select class="form-select" id="districtDropdown" onchange="filterData()">
+                                    <option value="">Select District</option>
+                                    {% for district in districts %}
+                                        <option value="{{ district['ID'] }}">{{ district['dropdownvalue'] }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -194,7 +203,7 @@
                             <div class="col-md-12">
                                 <!-- Wrapper for horizontal scrolling -->
                                 <div id="table-wrapper" style="overflow-x: auto; width: 100%;"> <!-- Removed the border -->
-                                    <table class="table mt-3" id="data-table" style="width: 160%; table-layout: fixed; border-collapse: collapse;"> <!-- table-layout: fixed ensures equal column widths -->
+                                    <table class="table mt-3" id="data-table" style="width: 200%; table-layout: fixed; border-collapse: collapse;"> <!-- table-layout: fixed ensures equal column widths -->
                                         <thead>
                                             <tr>
                                                 <th>First Name</th>
@@ -213,7 +222,7 @@
                                             <tr>
                                                 <td>{{ seminar['FirstName'] }}</td>
                                                 <td>{{ seminar['LastName'] }}</td>
-                                                <td>{{ seminar['RegistrationNo'] }}</td>
+                                                <td>{{ seminar['RegitrationNo'] }}</td>
                                                 <td>{{ seminar['Seminars'] }}</td>
                                                 <td>{{ seminar['Email'] }}</td>
                                                 <td>{{ seminar['Phone'] }}</td>

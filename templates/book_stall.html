@@ -105,33 +105,13 @@
         }
 
 
-        .map-container {
-            text-align: center;
-            margin: 10px 0;
-        }
+.modal-image {
+    max-width: 10%;
+    max-height: 80%;
+    width: auto;
+    height: auto;
+}
 
-        
-    
-        .modal {
-        display: none; /* Hidden by default */
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
-        overflow: auto;
-    }
-
-    .modal-content {
-        background-color: white;
-        margin: 15% auto;
-        padding: 20px;
-        width: 80%;
-        max-width: 600px;
-        border-radius: 10px;
-    }
 
     .close {
         color: #aaa;
@@ -214,9 +194,11 @@
     <div id="mapModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('mapModal')">&times;</span>
-            <img src="{{ url_for('static', filename='slot.png') }}" alt="Map" style="width: 100%; height: auto;">
+            <img src="{{ url_for('static', filename='slot.png') }}" alt="Map" class="modal-image">
         </div>
-    </div>  
+    </div>
+    
+     
 
     <!-- Slot number input -->
     <input type="text" id="slotInput" placeholder="Enter Slot Number" />
@@ -227,7 +209,7 @@
     <div class="container mt-4">
         <h1 class="text-center">Book Stall</h1>
         <h5 class="text-center">Registration No: {{ registration_no }}</h5>
-
+    
         <!-- Stall Grid -->
         <div class="stall-grid mt-3" id="stall-grid">
             {% for stall in slots %}
@@ -237,149 +219,146 @@
             </div>
             {% endfor %}
         </div>
-
+    
         <div class="map-container">
             <img src="{{ url_for('static', filename='slot.png') }}" alt="Venue map">
         </div>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const stalls = document.querySelectorAll('.stall');
-
-            // Function to handle booking of stalls
-            stalls.forEach(stall => {
-                if (!stall.classList.contains('booked')) {
-                    stall.addEventListener('click', () => {
-                        const stallId = stall.id; // Stall ID from the div
-                        const registrationNo = "{{ registration_no }}"; // Registration number from Flask
-
-                        Swal.fire({
-                            title: "Do you want to book the stall?",
-                            showDenyButton: true,
-                            confirmButtonText: "Yes",
-                            denyButtonText: "No",
-                        }).then(result => {
-                            if (result.isConfirmed) {
-                                fetch("/book_stall", {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                    },
-                                    body: JSON.stringify({
-                                        stallId: stallId,
-                                        registrationId: registrationNo,
-                                        modifiedByUserName: "admin",
-                                        modifiedBy: 1,
-                                    }),
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        stall.classList.add('booked');
-                                        stall.textContent += ' (Booked)';
-                                        Swal.fire("Stall Booked!", "", "success");
-                                    } else {
-                                        Swal.fire("Error", data.message, "error");
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error("Error:", error);
-                                    Swal.fire("Error", "An error occurred.", "error");
-                                });
-                            }
-                        });
-                    });
-                }
-            });
-        });
-
     
-   
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const stalls = document.querySelectorAll('.stall');
+    
+        // Function to handle booking of stalls
+        stalls.forEach(stall => {
+            if (!stall.classList.contains('booked')) {
+                stall.addEventListener('click', () => {
+                    const stallId = stall.id; // Stall ID from the div
+                    const registrationNo = "{{ registration_no }}"; // Registration number from Flask
+    
+                    Swal.fire({
+                        title: "Do you want to book the stall?",
+                        showDenyButton: true,
+                        confirmButtonText: "Yes",
+                        denyButtonText: "No",
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            // Sending booking request
+                            fetch("/book_stall", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                    stallId: stallId,
+                                    registrationId: registrationNo,
+                                    modifiedByUserName: "admin", // Adjust based on your user system
+                                    modifiedBy: 1, // Adjust based on your user system
+                                }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    stall.classList.add('booked');
+                                    stall.textContent += ' (Booked)';
+                                    Swal.fire("Stall Booked!", "", "success");
+                                } else {
+                                    Swal.fire("Error", data.message, "error");
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error:", error);
+                                Swal.fire("Error", "An error occurred while booking the stall.", "error");
+                            });
+                        }
+                    });
+                });
+            }
+        });
+    });
 
+// Check Slot Status
+function checkSlotStatus() {
+    const slotNumber = document.getElementById('slotInput').value.trim();
 
+    if (slotNumber === "") {
+        alert("Please enter a slot number.");
+        return;
+    }
 
+    fetch(`/check_slot_status?slotNumber=${slotNumber}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const resultDiv = document.getElementById('statusResult');
+            if (data.success) {
+                resultDiv.textContent = `Slot ${slotNumber} is ${data.status}`;
+                resultDiv.className = data.status.toLowerCase();
+            } else {
+                resultDiv.textContent = data.message;
+                resultDiv.className = '';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('statusResult').textContent = 'An error occurred.';
+        });
+}
 
-        function checkSlotStatus() {
-            const slotNumber = document.getElementById('slotInput').value.trim();
+// Show the grid modal when filter changes
+document.getElementById('filter').addEventListener('change', function () {
+    filterSlots();
+});
 
-            if (slotNumber === "") {
-                alert("Please enter a slot number.");
-                return;
+// Function to filter slots and display in a grid popup
+function filterSlots() {
+    const filterValue = document.getElementById('filter').value;  // Get selected filter value
+
+    fetch(`/filter_slots?status=${filterValue}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const slotGrid = document.getElementById('slotGrid');
+            slotGrid.innerHTML = '';  // Clear previous grid
+
+            if (data.success && data.slots.length > 0) {
+                data.slots.forEach(slot => {
+                    const slotDiv = document.createElement('div');
+                    slotDiv.textContent = `Slot ${slot.SlotNumber}: ${slot.Status}`;
+                    slotDiv.classList.add('slot', slot.Status.toLowerCase());
+                    slotGrid.appendChild(slotDiv);
+                });
+            } else {
+                slotGrid.innerHTML = '<p>No slots found.</p>';
             }
 
-            fetch(`/check_slot_status?slotNumber=${slotNumber}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const resultDiv = document.getElementById('statusResult');
-                    if (data.success) {
-                        resultDiv.textContent = `Slot ${slotNumber} is ${data.status}`;
-                        resultDiv.className = data.status.toLowerCase();
-                    } else {
-                        resultDiv.textContent = data.message;
-                        resultDiv.className = '';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('statusResult').textContent = 'An error occurred.';
-                });
-        }
-
-          // Show the grid modal when filter changes
-          document.getElementById('filter').addEventListener('change', function () {
-            filterSlots();
+            // Open the modal to show the grid
+            viewGrid();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while fetching the slots.');
         });
+}
 
-        // Function to filter slots and display in a grid popup
-        function filterSlots() {
-            const filterValue = document.getElementById('filter').value;  // Get selected filter value
+// Open the modal
+function viewGrid() {
+    document.getElementById('gridModal').style.display = 'block';
+}
 
-            fetch(`/filter_slots?status=${filterValue}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const slotGrid = document.getElementById('slotGrid');
-                    slotGrid.innerHTML = '';  // Clear previous grid
+// Close the modal
+function closeModal() {
+    document.getElementById('gridModal').style.display = 'none';
+}
 
-                    if (data.success && data.slots.length > 0) {
-                        data.slots.forEach(slot => {
-                            const slotDiv = document.createElement('div');
-                            slotDiv.textContent = `Slot ${slot.SlotNumber}: ${slot.Status}`;
-                            slotDiv.classList.add('slot', slot.Status.toLowerCase());
-                            slotGrid.appendChild(slotDiv);
-                        });
-                    } else {
-                        slotGrid.innerHTML = '<p>No slots found.</p>';
-                    }
-
-                    // Open the modal to show the grid
-                    viewGrid();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while fetching the slots.');
-                });
-        }
-
-        // Open the modal
-        function viewGrid() {
-            document.getElementById('gridModal').style.display = 'block';
-        }
-
-        // Close the modal
-        function closeModal() {
-            document.getElementById('gridModal').style.display = 'none';
-        }
     </script>
 </body>
 

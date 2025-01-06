@@ -156,24 +156,25 @@
                                 <select class="form-select me-2" id="genderDropdown" onchange="filterData()">
                                     <option value="">Select Gender</option>
                                     {% for gender in genders %}
-                                    <option value="{{ gender['dropdownvalue'] }}">{{ gender['dropdownvalue'] }}</option>
+                                    <option value="{{ gender['DropDownValue'] }}">{{ gender['DropDownValue'] }}</option>
                                     {% endfor %}
                                 </select>
-
+                                
                                 <select class="form-select me-2" id="categoryDropdown" onchange="filterData()">
                                     <option value="">Select Category</option>
                                     {% for category in categories %}
-                                    <option value="{{ category['dropdownvalue'] }}">{{ category['dropdownvalue'] }}
-                                    </option>
+                                    <option value="{{ category['DropDownValue'] }}">{{ category['DropDownValue'] }}</option>
                                     {% endfor %}
                                 </select>
-
+                                
                                 <select class="form-select" id="stateDropdown" onchange="filterData()">
                                     <option value="">Select State</option>
                                     {% for state in states %}
-                                    <option value="{{ state['dropdownvalue'] }}">{{ state['dropdownvalue'] }}</option>
+                                    <option value="{{ state['DropDownValue'] }}">{{ state['DropDownValue'] }}</option>
                                     {% endfor %}
                                 </select>
+                                
+                                
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <!-- Left Section -->
@@ -201,13 +202,13 @@
                             <div class="col-md-12">
                                 <!-- Wrapper for horizontal scrolling -->
                                 <div id="table-wrapper" style="overflow-x: auto; width: 100%;"> <!-- Removed the border -->
-                                    <table class="table mt-3" id="data-table" style="width: 155%; table-layout: fixed; border-collapse: collapse;"> <!-- table-layout: fixed ensures equal column widths -->
+                                    <table class="table mt-3" id="data-table" style="width: 184%; table-layout: fixed; border-collapse: collapse;"> <!-- table-layout: fixed ensures equal column widths -->
                                         <thead>
                                             <tr>
                                                 <th>First Name</th>
                                                 <th>Last Name</th>
                                                 <th>Registration No</th>
-                                                <th>Others Category</th>
+                                                <th>Visitors Category</th>
                                                 <th>Email Address</th>
                                                 <th>Phone Number</th>
                                                 <th>Gender</th> <!-- Added Gender column -->
@@ -220,14 +221,13 @@
                                             <tr>
                                                 <td>{{ visitor['FirstName'] }}</td>
                                                 <td>{{ visitor['LastName'] }}</td>
-                                                <td>{{ visitor['RegistrationNo'] }}</td>
-                                                <td>{{ visitor['VisitorCategory'] }}</td>
+                                                <td>{{ visitor['RegitrationNo'] }}</td>
+                                                <td>{{ visitor['VisitorCategory'] }}</td> <!-- Check if this displays properly -->
                                                 <td>{{ visitor['Email'] }}</td>
                                                 <td>{{ visitor['Phone'] }}</td>
-                                                <!-- Wrap the following columns in a div for horizontal scrolling -->
-                                                <td class="scrollable-column">{{ visitor['Gender'] }}</td>
-                                                <td class="scrollable-column">{{ visitor['State'] }}</td>
-                                                <td class="scrollable-column">{{ visitor['District'] }}</td>
+                                                <td>{{ visitor['Gender'] }}</td>
+                                                <td>{{ visitor['State'] }}</td>
+                                                <td>{{ visitor['District'] }}</td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
@@ -296,36 +296,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+function filterData() {
+        var selectedGender = document.getElementById('genderDropdown').value;
+        var selectedCategory = document.getElementById('categoryDropdown').value;
+        var selectedState = document.getElementById('stateDropdown').value;
 
-         function filterData() {
-        // Get the values of the selected filters
-        const gender = document.getElementById("genderDropdown").value;
-        const category = document.getElementById("categoryDropdown").value;
-        const state = document.getElementById("stateDropdown").value;
+        // Get all rows in the table
+        var rows = document.querySelectorAll('table tbody tr');
 
-        // Get all the rows in the table
-        const rows = document.querySelectorAll("table tbody tr");
+        rows.forEach(function(row) {
+            var gender = row.querySelector('td:nth-child(6)').textContent.trim(); // Assuming Gender is in the 6th column
+            var visitorCategory = row.querySelector('td:nth-child(4)').textContent.trim(); // Assuming VisitorCategory is in the 4th column
+            var state = row.querySelector('td:nth-child(7)').textContent.trim(); // Assuming State is in the 7th column
 
-        // Loop through each row and check if it matches the filter criteria
-        rows.forEach(row => {
-            const rowGender = row.querySelector("td:nth-child(7)").textContent.trim(); // Gender is in the 7th column
-            const rowCategory = row.querySelector("td:nth-child(4)").textContent.trim(); // Category is in the 4th column
-            const rowState = row.querySelector("td:nth-child(8)").textContent.trim(); // State is in the 8th column
+            // Check if row matches the selected filters
+            var matchesGender = (selectedGender === "" || gender === selectedGender);
+            var matchesCategory = (selectedCategory === "" || visitorCategory === selectedCategory);
+            var matchesState = (selectedState === "" || state === selectedState);
 
-            // Check if the row matches the filter conditions
-            const matchesGender = gender ? rowGender === gender : true;
-            const matchesCategory = category ? rowCategory === category : true;
-            const matchesState = state ? rowState === state : true;
-
-            // If the row matches the filters, show it, otherwise hide it
+            // Show or hide row based on the filter matches
             if (matchesGender && matchesCategory && matchesState) {
-                row.style.display = "";
+                row.style.display = ''; // Show the row
             } else {
-                row.style.display = "none";
+                row.style.display = 'none'; // Hide the row
             }
         });
     }
-
 
     document.addEventListener("DOMContentLoaded", function () {
         const entriesDropdown = document.getElementById("entries");

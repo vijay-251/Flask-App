@@ -302,6 +302,7 @@ thead th {
                         <option value="10">10</option>
                         <option value="15">15</option>
                         <option value="25" selected>25</option>
+                        <option value="400">400</option>
                     </select>
         
                     <button class="btn custom-btn" onclick="downloadExcel()">Excel</button>
@@ -317,9 +318,8 @@ thead th {
 
         <!-- Table -->
         <div class="table-responsive">
-            <table id="stall_allocationtable" class="table  align-middle">  
+            <table id="stall_allocationtable" class="table align-middle">
                 <thead class="custom-table-header" style="background-color: #003366;">
-                
                     <tr>
                         <th scope="col">Action</th>
                         <th scope="col">First Name</th>
@@ -331,6 +331,7 @@ thead th {
                         <th scope="col">Phone</th>
                         <th scope="col">State</th>
                         <th scope="col">District</th>
+                        <th scope="col">Status</th> <!-- Added Status Column -->
                     </tr>
                 </thead>
                 <tbody>
@@ -338,61 +339,57 @@ thead th {
                     <tr>
                         <td>
                             <!-- Approve Button -->
-                            <form action="{{ url_for('update_exhibitor_status', action='approve') }}" method="POST" style="display: inline;" id="approveForm">
-                                <input type="hidden" name="registration_no" value="{{ exhibitor[2] }}">
-                                <button type="submit" class="btn btn-success btn-sm approve-btn" data-registration-no="{{ exhibitor[2] }}">Approve</button>
+                            <form action="{{ url_for('update_exhibitor_status', action='approve') }}" method="POST" style="display: inline;">
+                                <input type="hidden" name="registration_no" value="{{ exhibitor['RegitrationNo'] }}">
+                                <button type="button" class="btn btn-success btn-sm approve-btn" data-registration-no="{{ exhibitor['RegitrationNo'] }}">
+                                    Approve
+                                </button>
                             </form>
-                
+                            
                             <!-- Reject Button -->
-                            <form action="{{ url_for('update_exhibitor_status', action='reject') }}" method="post" style="display: inline;">
-                                <input type="hidden" name="registration_no" value="{{ exhibitor[2] }}">
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to reject this exhibitor?')">Reject</button>
+                            <form action="{{ url_for('update_exhibitor_status', action='reject') }}" method="POST" style="display: inline;">
+                                <input type="hidden" name="registration_no" value="{{ exhibitor['RegitrationNo'] }}">
+                                <button type="button" class="btn btn-danger btn-sm reject-btn" data-registration-no="{{ exhibitor['RegitrationNo'] }}">
+                                    Reject
+                                </button>
                             </form>
                         </td>
-                
-                        <td>{{ exhibitor[0] }}</td> <!-- FirstName -->
-                        <td>{{ exhibitor[1] }}</td> <!-- LastName -->
-                        <td>{{ exhibitor[2] }}</td> <!-- RegistrationNo -->
-                        <td>{{ exhibitor[3] }}</td> <!-- BusinessCategory -->
-                        <td>{{ exhibitor[4] }}</td> <!-- Email -->
-                        <td>{{ exhibitor[5] }}</td> <!-- Gender -->
-                        <td>{{ exhibitor[6] }}</td> <!-- Phone -->
-                        <td>{{ exhibitor[7] }}</td> <!-- State -->
-                        <td>{{ exhibitor[8] }}</td> <!-- District -->
-                
-                        <!-- Add Approved and Rejected columns here -->
+                        <td>{{ exhibitor['FirstName'] }}</td>
+                        <td>{{ exhibitor['LastName'] }}</td>
+                        <td>{{ exhibitor['RegitrationNo'] }}</td>
+                        <td>{{ exhibitor['BusinessCategory'] }}</td>
+                        <td>{{ exhibitor['Email'] }}</td>
+                        <td>{{ exhibitor['Gender'] }}</td>
+                        <td>{{ exhibitor['Phone'] }}</td>
+                        <td>{{ exhibitor['State'] }}</td>
+                        <td>{{ exhibitor['District'] }}</td>
                         <td>
-                            {% if exhibitor[9] == 1 %}
-                                Approved
-                            {% elif exhibitor[9] == -1 %}
-                                Rejected
-                            {% elif exhibitor[9] == 0 %}
-                                Pending
-                            {% else %}
-                                Unknown Status
+                            {% if exhibitor['IsStallApprove'] == 1 %}
+                            Approved
+                            {% elif exhibitor['IsStallApprove'] == 0 %}
+                            Rejected
+                            {% elif exhibitor['IsStallApprove'] is none %}
+                            Pending
                             {% endif %}
                         </td>
-                        
-                        
-                        
                     </tr>
                     {% endfor %}
-                </tbody>
-                
+                </tbody>             
             </table>
         </div>
+        
      
         <script>
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.approve-btn').forEach(button => {
         button.addEventListener('click', function (event) {
-            event.preventDefault();  // Prevent the form from submitting immediately
+            event.preventDefault(); // Prevent form submission
 
             const registrationNo = this.dataset.registrationNo;
-            const imageUrl = "{{ url_for('static', filename='slot.png') }}";  // Image URL for venue map
-            const form = this.closest('form');  // Get the closest form element
+            const imageUrl = "{{ url_for('static', filename='slot.png') }}"; // Venue map image
+            const form = this.closest('form'); // Get the form element
 
-            // Show initial confirmation popup
+            // Show the initial confirmation popup
             Swal.fire({
                 title: 'Are you sure?',
                 text: 'Do you want to approve this exhibitor?',
@@ -401,15 +398,44 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmButtonText: 'Yes, approve!'
             }).then(result => {
                 if (result.isConfirmed) {
-                    // Show the image popup after confirming
-                    Swal.fire({
-                        imageUrl: imageUrl,
-                        imageHeight: 500,
-                        imageAlt: 'Venue Map',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        // Submit the form after confirming
-                        form.submit();  // This submits the form to the server
+                    // Make an AJAX call to the server
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show the image popup
+                            Swal.fire({
+                                imageUrl: imageUrl,
+                                imageHeight: 500,
+                                imageAlt: 'Venue Map',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                // Redirect to the booking page
+                                if (data.redirect_url) {
+                                    window.location.href = data.redirect_url;
+                                }
+                            });
+                        } else {
+                            // Handle error message
+                            Swal.fire({
+                                title: 'Error',
+                                text: data.message,
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'An unexpected error occurred.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
                     });
                 }
             });
@@ -418,6 +444,61 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
+document.querySelectorAll('.reject-btn').forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent form submission
+
+            const form = this.closest('form'); // Get the form element
+
+            // Show the reject confirmation popup
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you want to reject this exhibitor?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, reject!',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    // Make an AJAX call to the server
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Rejected!',
+                                text: 'The exhibitor has been rejected.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            });
+                        } else {
+                            // Handle error message
+                            Swal.fire({
+                                title: 'Error',
+                                text: data.message,
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'An unexpected error occurred.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    });
+                }
+            });
+        });
+    });
 
             const reportToggle = document.getElementById('reportToggle');
     const reportDropdown = document.getElementById('reportDropdown');

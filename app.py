@@ -4,6 +4,8 @@ from threading import Thread, Lock
 import uuid
 from flask import Flask, render_template, request, session, redirect, url_for, flash, send_file, abort,make_response, jsonify
 import os
+from mysql.connector import Error
+import logging
 
 from datetime import datetime
 app = Flask(__name__)
@@ -17,68 +19,67 @@ admin_credentials = {
 
 # Establish database connection
 conn = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="12345678",
-    database= "db_a8c9f1_tnbeats",
-    auth_plugin="mysql_native_password"
+    host="tnbeat2025.pixoustech.in",
+    user="hei3blcfx7yy",
+    password="Pixoustech@2023",
+    database= "tnbeatexpo_registration",
 )
 cur = conn.cursor()
 
 # Create and use database
-cur.execute("CREATE DATABASE IF NOT EXISTS db_a8c9f1_tnbeats;")
-cur.execute("USE db_a8c9f1_tnbeats;")
+cur.execute("CREATE DATABASE IF NOT EXISTS tnbeatexpo_registration;")
+cur.execute("USE tnbeatexpo_registration;")
 
 # Create the registration table
-cur.execute('''
-    CREATE TABLE IF NOT EXISTS registrationmaster (
-        ID VARCHAR(50) PRIMARY KEY,
-        RegistrationType VARCHAR(250),
-        RegistrationNoPrefix VARCHAR(250),
-        RegistrationNo VARCHAR(250),
-        RegistrationRunningNo INT,
-        FirstName VARCHAR(350),
-        LastName VARCHAR(350),
-        Gender VARCHAR(350),
-        Age INT,
-        Community VARCHAR(350),
-        Phone VARCHAR(50),
-        Email VARCHAR(350),
-        District VARCHAR(350),
-        State VARCHAR(350),
-        ReferenceBy VARCHAR(350),
-        VisitorCategory VARCHAR(350),
-        PurposeOfVisit TEXT,
-        InterestedSector VARCHAR(350),
-        PurposeOfParticipation TEXT,
-        CompanyName TEXT,
-        BusinessCategory VARCHAR(350),
-        BusinessType VARCHAR(350),
-        BusinessTrade VARCHAR(350),
-        YearEstablished VARCHAR(350) DEFAULT 0,
-        BusinessTurnOver  VARCHAR(350) DEFAULT 0,
-        UdyogRegistrationId TEXT,
-        GSTNumber TEXT,
-        DescriptionOfProducts TEXT,
-        IsMoreStailsReq BIT(1),
-        IsActive BIT(1),
-        CreatedBy VARCHAR(50),
-        CreatedByUsername VARCHAR(250),
-        CreatedDate DATETIME,
-        ModifiedBy VARCHAR(50),
-        ModifiedByUserName VARCHAR(250),
-        DeletedBy VARCHAR(50),
-        DeletedByUserName VARCHAR(250),
-        DeletedDate DATETIME,
-        Seminars TEXT,
-        ReferenceByOthers VARCHAR(500),
-        OthersCategory VARCHAR(100),
-        IsStallCancelled BIT(1),
-        NatureOfActivities VARCHAR(100),
-        IsCheckedIn BIT(1)
+# cur.execute('''
+#     CREATE TABLE IF NOT EXISTS registrationmaster (
+#         ID VARCHAR(50) PRIMARY KEY,
+#         RegistrationType VARCHAR(250),
+#         RegistrationNoPrefix VARCHAR(250),
+#         RegistrationNo VARCHAR(250),
+#         RegistrationRunningNo INT,
+#         FirstName VARCHAR(350),
+#         LastName VARCHAR(350),
+#         Gender VARCHAR(350),
+#         Age INT,
+#         Community VARCHAR(350),
+#         Phone VARCHAR(50),
+#         Email VARCHAR(350),
+#         District VARCHAR(350),
+#         State VARCHAR(350),
+#         ReferenceBy VARCHAR(350),
+#         VisitorCategory VARCHAR(350),
+#         PurposeOfVisit TEXT,
+#         InterestedSector VARCHAR(350),
+#         PurposeOfParticipation TEXT,
+#         CompanyName TEXT,
+#         BusinessCategory VARCHAR(350),
+#         BusinessType VARCHAR(350),
+#         BusinessTrade VARCHAR(350),
+#         YearEstablished VARCHAR(350) DEFAULT 0,
+#         BusinessTurnOver  VARCHAR(350) DEFAULT 0,
+#         UdyogRegistrationId TEXT,
+#         GSTNumber TEXT,
+#         DescriptionOfProducts TEXT,
+#         IsMoreStailsReq BIT(1),
+#         IsActive BIT(1),
+#         CreatedBy VARCHAR(50),
+#         CreatedByUsername VARCHAR(250),
+#         CreatedDate DATETIME,
+#         ModifiedBy VARCHAR(50),
+#         ModifiedByUserName VARCHAR(250),
+#         DeletedBy VARCHAR(50),
+#         DeletedByUserName VARCHAR(250),
+#         DeletedDate DATETIME,
+#         Seminars TEXT,
+#         ReferenceByOthers VARCHAR(500),
+#         OthersCategory VARCHAR(100),
+#         IsStallCancelled BIT(1),
+#         NatureOfActivities VARCHAR(100),
+#         IsCheckedIn BIT(1)
         
-    )
-''')
+#     )
+# ''')
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -119,7 +120,7 @@ def visitor():
             createdate = datetime.now()
 
             # Fetch the current running number and increment it
-            query = "SELECT MAX(RegistrationRunningNo) FROM registrationmaster WHERE RegistrationType = %s"
+            query = "SELECT MAX(RegistrationRunningNo) FROM registrationmaster WHERE RegitrationType = %s"
             cur.execute(query, (rt,))
             result = cur.fetchone()  # Fetch the result
             current_no = result[0] if result[0] else 0  # Start from 0 if none exists
@@ -134,7 +135,7 @@ def visitor():
 
             # Insert into the database
             query = '''
-                INSERT INTO registrationmaster (ID, RegistrationType, RegistrationNoPrefix, RegistrationNo, RegistrationRunningNo, FirstName, LastName, Gender, Age, Phone, Email, District, State, VisitorCategory, PurposeOfVisit, CreatedBy, CreatedByUserName, IsMoreStallsReq, CreatedDate)
+                INSERT INTO registrationmaster (ID, RegitrationType, RegistrationNoPrefix, RegistrationNo, RegistrationRunningNo, FirstName, LastName, Gender, Age, Phone, Email, District, State, VisitorCategory, PurposeOfVisit, CreatedBy, CreatedByUserName, IsMoreStallsReq, CreatedDate)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             '''
             params = (random_id, rt, prefix, r_no, new_no, fname, lname, gender, age, phone, email, district, state, visitor, purpose, random_id, fname + " " + lname, ismorestall, createdate)
@@ -177,7 +178,7 @@ def seminar():
                 ismorestall=1
             createdate=datetime.now()
             # Fetch the current running number and increment it
-            query = "SELECT MAX(RegistrationRunningNo) FROM registrationmaster WHERE RegistrationType = %s"
+            query = "SELECT MAX(RegistrationRunningNo) FROM registrationmaster WHERE RegitrationType = %s"
             cur.execute(query, (rt,))
             result = cur.fetchone()
             current_no = result[0] if result[0] else 0  # Start from 10000 if none exists
@@ -186,7 +187,7 @@ def seminar():
 
             # Insert into the database
             query = '''
-                INSERT INTO registrationmaster (ID,RegistrationType,RegistrationNoPrefix,RegistrationNo,RegistrationRunningNo,FirstName,LastName,Gender,Age,Phone,Email,District,State,InterestedSector,PurposeOfParticipation,CreatedBy,CreatedByUserName,IsMoreStallsReq,CreatedDate,Seminars)
+                INSERT INTO registrationmaster (ID,RegitrationType,RegistrationNoPrefix,RegistrationNo,RegistrationRunningNo,FirstName,LastName,Gender,Age,Phone,Email,District,State,InterestedSector,PurposeOfParticipation,CreatedBy,CreatedByUserName,IsMoreStallsReq,CreatedDate,Seminars)
                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             '''
             params = (random_id,rt,prefix,r_no,new_no,fname,lname,gender,age,phone,email,district,state,sector,purpose,random_id,fname+" " +lname,ismorestall,createdate,semi)
@@ -239,7 +240,7 @@ def exhibitor():
             createdate = datetime.now()
 
             # Fetch the current running number and increment it
-            query = "SELECT MAX(RegistrationRunningNo) FROM registrationmaster WHERE RegistrationType = %s"
+            query = "SELECT MAX(RegistrationRunningNo) FROM registrationmaster WHERE RegitrationType = %s"
             cur.execute(query, (rt,))
             result = cur.fetchone()
             current_no = result[0] if result[0] else 0  # Start from 10000 if none exists
@@ -253,7 +254,7 @@ def exhibitor():
             # Insert into the database
             query = '''
                 INSERT INTO registrationmaster (
-                    ID, RegistrationType, RegistrationNoPrefix, RegistrationNo, 
+                    ID, RegitrationType, RegistrationNoPrefix, RegistrationNo, 
                     RegistrationRunningNo, FirstName, LastName, Gender, Age, Phone, 
                     Email, District, State, CompanyName, BusinessCategory, BusinessType, 
                     YearEstablished, BusinessTurnOver, UdyogRegistrationId, GSTNumber, 
@@ -313,7 +314,7 @@ def others():
         createdate = datetime.now()
         
         # Fetch the current running number and increment it
-        query = "SELECT MAX(RegistrationRunningNo) FROM registrationmaster WHERE RegistrationType = %s"
+        query = "SELECT MAX(RegistrationRunningNo) FROM registrationmaster WHERE RegitrationType = %s"
         cur.execute(query, (rt,))
         result = cur.fetchone()
         current_no = result[0] if result[0] else 0  # Start from 10000 if none exists
@@ -322,7 +323,7 @@ def others():
 
         # Insert into the database
         query_insert = '''
-            INSERT INTO registrationmaster (ID, RegistrationType, RegistrationNoPrefix, RegistrationNo, RegistrationRunningNo, FirstName, LastName, Gender, Age, Phone, Email, District, State, OthersCategory, CreatedBy, CreatedByUserName, IsMoreStallsReq, CreatedDate)
+            INSERT INTO registrationmaster (ID, RegitrationType, RegistrationNoPrefix, RegistrationNo, RegistrationRunningNo, FirstName, LastName, Gender, Age, Phone, Email, District, State, OthersCategory, CreatedBy, CreatedByUserName, IsMoreStallsReq, CreatedDate)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         '''
         params = (random_id, rt, prefix, r_no, new_no, fname, lname, gender, age, phone, email, district, state, category, random_id, fname + " " + lname, ismorestall, createdate)
@@ -340,7 +341,7 @@ def register():
         
         # Query the database to find the visitor with the given phone number
         query = """SELECT FirstName, LastName,Phone, Email, VisitorCategory, State, District, RegistrationNo
-                   FROM registrationmaster WHERE Phone = %s and RegistrationType='VISITOR'"""
+                   FROM registrationmaster WHERE Phone = %s and RegitrationType='VISITOR'"""
         cur.execute(query, (phone,))
         result = cur.fetchone()  # Get the first matching record
         
@@ -428,11 +429,10 @@ def admin_dashboard():
     try:
         # Connect to the database
         conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",  # Replace with your actual database name
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+            user="hei3blcfx7yy",
+            password="Pixoustech@2023",
+            database="tnbeatexpo_registration",
         )
         cursor = conn.cursor(dictionary=True)
         
@@ -441,21 +441,21 @@ def admin_dashboard():
         total_registrations = cursor.fetchone()['total']
         
         # Query breakdown of different categories
-        cursor.execute("SELECT COUNT(*) AS total FROM registrationmaster WHERE RegistrationType = 'visitor'")
+        cursor.execute("SELECT COUNT(*) AS total FROM registrationmaster WHERE RegitrationType = 'visitor'")
         visitors = cursor.fetchone()['total']
         
-        cursor.execute("SELECT COUNT(*) AS total FROM registrationmaster WHERE RegistrationType = 'SEMINAR_ATTENDEE'")
+        cursor.execute("SELECT COUNT(*) AS total FROM registrationmaster WHERE RegitrationType = 'SEMINAR_ATTENDEE'")
         seminar_attendees = cursor.fetchone()['total']
         
-        cursor.execute("SELECT COUNT(*) AS total FROM registrationmaster WHERE RegistrationType = 'exhibitor'")
+        cursor.execute("SELECT COUNT(*) AS total FROM registrationmaster WHERE RegitrationType = 'EXHIBITORS'")
         exhibitors = cursor.fetchone()['total']
         
-        cursor.execute("SELECT COUNT(*) AS total FROM registrationmaster WHERE RegistrationType = 'others'")
+        cursor.execute("SELECT COUNT(*) AS total FROM registrationmaster WHERE RegitrationType = 'others'")
         others = cursor.fetchone()['total']
 
     except mysql.connector.Error as err:
         print(f"Database error: {err}")
-        return "An error occurred while connecting to the database.", 500
+        return f"An error occurred while connecting to the database: {err}", 500
     finally:
         # Close database connection
         if 'cursor' in locals():
@@ -471,26 +471,42 @@ def admin_dashboard():
         seminar_attendees=seminar_attendees,
         exhibitors=exhibitors,
         others=others
-)
+    )
 
 @app.route('/data/registrations')
 def registration_data():
     try:
-        # Query the database for registration counts by type
-        cur.execute("""
-            SELECT RegistrationType, COUNT(*) AS Count
-            FROM registrationmaster
-            GROUP BY RegistrationType
-        """)
-        result = cur.fetchall()
+        # Connect to the database
+        conn = mysql.connector.connect(
+            host="tnbeat2025.pixoustech.in",
+            user="hei3blcfx7yy",
+            password="Pixoustech@2023",
+            database="tnbeatexpo_registration",
+        )
+        cursor = conn.cursor(dictionary=True)  # Use dictionary for better readability
 
-        # Prepare the data to send to the frontend
-        labels = [row[0] for row in result]  # ['Visitor', 'Seminar Attendee', 'Exhibitor', 'Others']
-        counts = [row[1] for row in result]  # [count1, count2, count3, count4]
+        # Query for registration counts grouped by type
+        cursor.execute("""
+            SELECT RegitrationType, COUNT(*) AS Count
+            FROM registrationmaster
+            GROUP BY RegitrationType
+        """)
+        result = cursor.fetchall()
+
+        # Prepare data for the frontend
+        labels = [row['RegitrationType'] for row in result]  # ['Visitor', 'Seminar Attendee', 'Exhibitor', 'Others']
+        counts = [row['Count'] for row in result]  # [count1, count2, count3, count4]
 
         return jsonify({'labels': labels, 'counts': counts})
     except Exception as e:
-        return jsonify({'error': str(e)})
+        print(f"Error fetching registration data: {e}")
+        return jsonify({'error': 'An error occurred while fetching registration data.'}), 500
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals() and conn.is_connected():
+            conn.close()
+
 
 
 @app.route('/data/gender')
@@ -498,33 +514,38 @@ def gender_data():
     try:
         # Connect to the database
         conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+            user="hei3blcfx7yy",
+            password="Pixoustech@2023",
+            database="tnbeatexpo_registration",
         )
         cur = conn.cursor()
 
-        # Query to get the count of Male, Female, and Transgender registrations
-        cur.execute("""
-            SELECT Gender, COUNT(*) AS Count
-            FROM registrationmaster
-            WHERE Gender IN ('Male', 'Female', 'Transgender')
-            GROUP BY Gender
-        """)
-        result = cur.fetchall()
+        # Execute individual queries for each gender
+        queries = {
+            'Male': "SELECT COUNT(*) FROM registrationmaster WHERE Gender = 'e449de32-a931-11ee-a117-00155e1f5d07'",
+            'Female': "SELECT COUNT(*) FROM registrationmaster WHERE Gender = 'e449dfed-a931-11ee-a117-00155e1f5d07'",
+            'Transgender': "SELECT COUNT(*) FROM registrationmaster WHERE Gender = 'e449e0e8-a931-11ee-a117-00155e1f5d07'"
+        }
 
-        # Prepare the data to send to the frontend
-        labels = [row[0] for row in result]  # ['Male', 'Female', 'Transgender']
-        counts = [row[1] for row in result]  # [count_of_male, count_of_female, count_of_transgender]
+        labels = []
+        counts = []
 
+        for gender, query in queries.items():
+            cur.execute(query)
+            count = cur.fetchone()[0]  # Get the count result from the query
+            labels.append(gender)
+            counts.append(count)
+
+        # Return the data as JSON
         return jsonify({'labels': labels, 'counts': counts})
 
+    except mysql.connector.Error as db_err:
+        print(f"Database Error: {db_err}")  # Logs detailed database errors
+        return jsonify({'error': 'Database error occurred.'}), 500
     except Exception as e:
-        print(f"Error fetching gender data: {e}")  # Log the error
+        print(f"General Error: {e}")  # Logs general errors
         return jsonify({'error': 'An error occurred while fetching gender data.'}), 500
-
     finally:
         if 'cur' in locals():
             cur.close()
@@ -532,23 +553,26 @@ def gender_data():
             conn.close()
 
 
+
+
+
 @app.route('/data/exhibitor')
 def get_exhibitor_data():
     try:
+        # Establish database connection
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+            user="hei3blcfx7yy",
+            password="Pixoustech@2023",
+            database="tnbeatexpo_registration",
         )
         cur = connection.cursor()
 
         # Query to fetch the status of exhibitors
-        cur.execute("SELECT status FROM registrationmaster")
+        cur.execute("SELECT IsStallApprove FROM registrationmaster")
         statuses = [row[0] for row in cur.fetchall()]
 
-        return jsonify({'status': statuses})
+        return jsonify({'IsStallApprove': statuses})
 
     except mysql.connector.Error as err:
         print(f"MySQL Error: {err}")
@@ -569,11 +593,10 @@ def get_stall_booked_chart():
     try:
         # Connect to the database
         conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+             host="tnbeat2025.pixoustech.in",
+    user="hei3blcfx7yy",
+    password="Pixoustech@2023",
+    database= "tnbeatexpo_registration",
         )
         cur = conn.cursor(dictionary=True)
         
@@ -612,11 +635,10 @@ def get_age_registration():
     try:
         # Connect to the database
         conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+    host="tnbeat2025.pixoustech.in",
+    user="hei3blcfx7yy",
+    password="Pixoustech@2023",
+    database= "tnbeatexpo_registration",
         )
         cur = conn.cursor(dictionary=True)
 
@@ -659,11 +681,10 @@ def get_new_registrations():
     try:
         # Connect to the database
         conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+    user="hei3blcfx7yy",
+    password="Pixoustech@2023",
+    database= "tnbeatexpo_registration",
         )
         cur = conn.cursor(dictionary=True)
         
@@ -692,22 +713,25 @@ def get_new_registrations():
 
 
 
+
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
+    conn = None
+    cur = None
     try:
         # Connect to the MySQL database
         conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+            user="hei3blcfx7yy",
+            password="Pixoustech@2023",
+            database="tnbeatexpo_registration",
         )
+
+        # Create a cursor with dictionary results for easy access
         cur = conn.cursor(dictionary=True)
-        print("Connected to the database")
 
         # Fetch distinct registration types for the filter dropdown
-        cur.execute("SELECT DISTINCT RegistrationType FROM registrationmaster")
+        cur.execute("SELECT DISTINCT RegitrationType FROM registrationmaster")
         registrationtypes = cur.fetchall()
 
         # Fetch distinct states for the filter dropdown
@@ -718,43 +742,86 @@ def registration():
         cur.execute("SELECT DropDownValue FROM dropdownmaster WHERE DropDownType='DISTRICT'")
         districts = cur.fetchall()
 
-        # SQL query to fetch the required registration data based on selected filters
+        # SQL query to fetch registration data, joining with gender, state, and district values
         if request.method == 'POST':
             selected_type = request.form.get('registrationtype')
             selected_state = request.form.get('state')
             selected_district = request.form.get('district')
 
-            # Create the WHERE condition based on the selected filters
-            query = "  SELECT FirstName, LastName, RegistrationNo, RegistrationType, Email, Phone, Gender, State, District FROM registrationmaster  WHERE 1=1"
+            # Create the dynamic query with joins to get values instead of IDs
+            query = """
+                SELECT 
+                    r.FirstName, r.LastName, r.RegitrationNo, r.RegitrationType, 
+                    r.Email, r.Phone, 
+                    g.DropDownValue AS Gender,  -- Use DropDownValue for gender
+                    s.DropDownValue AS State, 
+                    d.DropDownValue AS District
+                FROM 
+                    registrationmaster r
+                    LEFT JOIN dropdownmaster g ON r.Gender = g.ID AND g.DropDownType = 'GENDER'
+                    LEFT JOIN dropdownmaster s ON r.State = s.ID AND s.DropDownType = 'STATE'
+                    LEFT JOIN dropdownmaster d ON r.District = d.ID AND d.DropDownType = 'DISTRICT'
+                WHERE 1=1
+            """
+
             filters = []
 
             if selected_type:
-                query += " AND RegistrationType = %s"
+                query += " AND r.RegitrationType = %s"
                 filters.append(selected_type)
             if selected_state:
-                query += " AND State = %s"
+                query += " AND r.State = %s"
                 filters.append(selected_state)
             if selected_district:
-                query += " AND District = %s"
+                query += " AND r.District = %s"
                 filters.append(selected_district)
 
             cur.execute(query, tuple(filters))
         else:
-            cur.execute(" SELECT FirstName, LastName, RegistrationNo, RegistrationType, Email, Phone, Gender, State, District   FROM registrationmaster")
-        
+            # Default query to fetch all registrations with actual values
+            cur.execute("""
+                SELECT 
+                    r.FirstName, r.LastName, r.RegitrationNo, r.RegitrationType, 
+                    r.Email, r.Phone, 
+                    g.DropDownValue AS Gender, 
+                    s.DropDownValue AS State, 
+                    d.DropDownValue AS District
+                FROM 
+                    registrationmaster r
+                    LEFT JOIN dropdownmaster g ON r.Gender = g.ID AND g.DropDownType = 'GENDER'
+                    LEFT JOIN dropdownmaster s ON r.State = s.ID AND s.DropDownType = 'STATE'
+                    LEFT JOIN dropdownmaster d ON r.District = d.ID AND d.DropDownType = 'DISTRICT'
+            """)
+
         # Fetch all the registration data
         registrations = cur.fetchall()
 
-        # Close the database connection
-        cur.close()
-        conn.close()
-
-        # Render the template and pass the registration data and filter options
-        return render_template('registrations.html', registrations=registrations, registrationtypes=registrationtypes, states=states, districts=districts)
-
     except mysql.connector.Error as err:
-        print(f"Error: {err}")
-        return "Database connection error occurred. Please try again later."
+        print(f"MySQL Error: {err}")
+        return f"Database connection error: {err}"
+
+    except Exception as e:
+        print(f"Unexpected Error: {e}")
+        return f"An unexpected error occurred: {e}"
+
+    finally:
+        # Ensure the cursor and connection are closed, if they were opened
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+    # Return the template with the registration data and filter options
+    return render_template(
+        'registrations.html',
+        registrations=registrations,
+        registrationtypes=registrationtypes,
+        states=states,
+        districts=districts
+    )
+
+
+
 
 
 @app.route('/details/<registration_no>', methods=['GET'])
@@ -762,11 +829,10 @@ def visitor_details(registration_no):
     try:
         # Connect to the MySQL database
         conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+    user="hei3blcfx7yy",
+    password="Pixoustech@2023",
+    database= "tnbeatexpo_registration",
         )
         cur = conn.cursor(dictionary=True)
 
@@ -790,100 +856,156 @@ def visitor_details(registration_no):
         print(f"Error: {err}")
         return "Database connection error occurred. Please try again later."
 
-
-
-
+logging.basicConfig(level=logging.DEBUG)
 @app.route('/stall_allocation', methods=['GET'])
 def stall_allocation():
-    # Fetch distinct values for dropdowns
-    dropdown_query = {
-        "Gender": "SELECT DISTINCT dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'GENDER'",
-        "BusinessCategory": "SELECT DISTINCT dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'BUSINESSCATEGORY'",
-        "State": "SELECT DISTINCT dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'STATE'",
-        "District": "SELECT DISTINCT dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'DISTRICT'"
-    }
-
-    dropdowns = {}
-    for key, query in dropdown_query.items():
-        cur.execute(query)
-        dropdowns[key] = cur.fetchall()
-
-    # Get filters from request arguments
-    gender_filter = request.args.get('gender', '')
-    status_filter = request.args.get('status', '')
-    category_filter = request.args.get('category', '')
-    state_filter = request.args.get('state', '')
-    district_filter = request.args.get('district', '')
-
-    # Build the exhibitor query dynamically based on filters
-    exhibitors_query = """
-        SELECT FirstName, LastName, RegistrationNo, BusinessCategory, Email, Gender, Phone, State, District, status 
-        FROM registrationmaster
-        WHERE RegistrationType = 'EXHIBITOR'
-    """
-    
-    filters = []
-    
-    # Add filters based on the selected values
-    if gender_filter:
-        filters.append(f"Gender = '{gender_filter}'")
-    
-    if status_filter:
-        if status_filter == "approved":
-            filters.append("status = 1")  # Approved
-        elif status_filter == "rejected":
-            filters.append("status = -1")  # Rejected
-        elif status_filter == "exhibitor":
-            filters.append("status = 0")  # Exhibitor (pending, if that's how you define it)
-        elif status_filter == "stall_booked":
-            filters.append("status = 2")  # Stall Booked (if this is another valid status)
-
-    if category_filter:
-        filters.append(f"BusinessCategory = '{category_filter}'")
-    if state_filter:
-        filters.append(f"State = '{state_filter}'")
-    if district_filter:
-        filters.append(f"District = '{district_filter}'")
+    try:
+        # Connect to the MySQL database
+        conn = mysql.connector.connect(
+            host="tnbeat2025.pixoustech.in",
+            user="hei3blcfx7yy",
+            password="Pixoustech@2023",
+            database="tnbeatexpo_registration",
+        )
+        logging.info("Successfully connected to the database.")
         
-    # Apply the filters if any
-    if filters:
-        exhibitors_query += " AND " + " AND ".join(filters)
+        # Create a cursor with dictionary results for easy access
+        cur = conn.cursor(dictionary=True)
 
-    # Execute the query
-    cur.execute(exhibitors_query)
-    exhibitors = cur.fetchall()
+        # Fetch distinct values for dropdowns
+        dropdown_query = {
+           "Gender": "SELECT id, dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'GENDER'",
+    "BusinessCategory": "SELECT id, dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'BUSINESSCATEGORY'",
+    "State": "SELECT id, dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'STATE'",
+    "District": "SELECT id, dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'DISTRICT'"
+        }
 
-    return render_template(
-        'stall_allocation.html',
-        exhibitors=exhibitors,
-        dropdowns=dropdowns,
-        gender_filter=gender_filter,
-        status_filter=status_filter,
-        category_filter=category_filter,
-        state_filter=state_filter,
-        district_filter=district_filter
-    )
+        dropdowns = {}
+        for key, query in dropdown_query.items():
+            cur.execute(query)
+            dropdowns[key] = cur.fetchall()
 
+        # Get filters from request arguments
+        gender_filter = request.args.get('gender', None)
+        status_filter = request.args.get('status', None)
+        category_filter = request.args.get('category', None)
+        state_filter = request.args.get('state', None)
+        district_filter = request.args.get('district', None)
 
+        logging.info(f"Received filters: gender={gender_filter}, status={status_filter}, category={category_filter}, state={state_filter}, district={district_filter}")
 
+        # Build exhibitor query to show all EXHIBITOR data
+        exhibitors_query = """
+            SELECT 
+                r.FirstName, 
+                r.LastName, 
+                r.RegitrationNo, 
+                r.Email, 
+                r.Phone, 
+                g.dropdownvalue AS Gender, 
+                s.dropdownvalue AS State, 
+                d.dropdownvalue AS District, 
+                bc.dropdownvalue AS BusinessCategory, 
+                r.IsStallApprove
+            FROM 
+                registrationmaster r
+            LEFT JOIN 
+                dropdownmaster g ON r.Gender = g.id AND g.dropdowntype = 'GENDER'
+            LEFT JOIN 
+                dropdownmaster s ON r.State = s.id AND s.dropdowntype = 'STATE'
+            LEFT JOIN 
+                dropdownmaster d ON r.District = d.id AND d.dropdowntype = 'DISTRICT'
+            LEFT JOIN 
+                dropdownmaster bc ON r.BusinessCategory = bc.id AND bc.dropdowntype = 'BUSINESSCATEGORY'
+            LEFT JOIN 
+                slotmaster sm ON r.RegitrationNo = sm.RegistrationId  # Join with slotmaster to get stall booking status
+            WHERE 
+                r.RegitrationType = 'EXHIBITORS'  # Only exhibitors
+        """
+
+        filters = []
+        parameters = []
+
+        # Add filters based on the selected values (parameterized queries to avoid SQL injection)
+        if gender_filter:
+            filters.append("r.Gender = %s")
+            parameters.append(gender_filter)
+        
+        if status_filter:
+            if status_filter == "approved":
+                filters.append("r.IsStallApprove = %s")
+                parameters.append(1)  # Approved
+            elif status_filter == "rejected":
+                filters.append("r.IsStallApprove = %s")
+                parameters.append(0)  # Rejected
+            elif status_filter == "exhibitor":
+                filters.append("r.IsStallApprove = %s")
+                parameters.append(2)  # Exhibitor (pending)
+            elif status_filter == "stall_booked":
+                filters.append("sm.IsBooked = %s")  # Stall is booked
+                parameters.append(1)  # IsBooked = 1 means booked
+
+        if category_filter:
+            filters.append("r.BusinessCategory = %s")
+            parameters.append(category_filter)
+        if state_filter:
+            filters.append("r.State = %s")
+            parameters.append(state_filter)
+        if district_filter:
+            filters.append("r.District = %s")
+            parameters.append(district_filter)
+
+        # Apply filters if any
+        if filters:
+            exhibitors_query += " AND " + " AND ".join(filters)
+
+        # Log the final query and parameters to debug
+        logging.info(f"Final SQL Query: {exhibitors_query}")
+        logging.info(f"Parameters: {parameters}")
+
+        # Execute the query with parameters to prevent SQL injection
+        cur.execute(exhibitors_query, tuple(parameters))
+        exhibitors = cur.fetchall()
+
+        # Log the results to verify
+        logging.info(f"Fetched exhibitors: {exhibitors}")
+
+        # Close the cursor and the connection
+        cur.close()
+        conn.close()
+
+        # Render the template with the fetched data
+        return render_template(
+            'stall_allocation.html',
+            exhibitors=exhibitors,
+            dropdowns=dropdowns,
+            gender_filter=gender_filter,
+            status_filter=status_filter,
+            category_filter=category_filter,
+            state_filter=state_filter,
+            district_filter=district_filter,
+        )
+
+    except mysql.connector.Error as err:
+        logging.error(f"MySQL Error: {err}")
+        return f"An error occurred while connecting to the database: {err}", 500
+    except Exception as e:
+        logging.error(f"Unexpected Error: {e}")
+        return f"An unexpected error occurred: {e}", 500
 
 
 @app.route('/stall_allocation/<action>', methods=['POST'])
 def update_exhibitor_status(action):
-    """Update the status of an exhibitor (Approve/Reject) and optionally redirect."""
+    """Update the IsStallApprove status and handle redirection for approval."""
     connection = None
     cur = None
     try:
-        # Debugging: print the action parameter
-        print(f"Action received: {action}")
-
-        # Connect to the database directly using your connection parameters
+        # Connect to the database
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+            user="hei3blcfx7yy",
+            password="Pixoustech@2023",
+            database="tnbeatexpo_registration",
         )
         cur = connection.cursor()
 
@@ -892,60 +1014,40 @@ def update_exhibitor_status(action):
         if not registration_no:
             return jsonify({'success': False, 'message': 'Registration number is missing'}), 400
 
-        # Debugging: print the registration number
-        print(f"Registration No: {registration_no}")
-
-        # Determine action (approve or reject)
         if action == 'approve':
-            print(f"Approving exhibitor with registration_no: {registration_no}")
             # Update the exhibitor's status to approved
             cur.execute("""
                 UPDATE registrationmaster 
-                SET status = 1  -- Approved
-                WHERE RegistrationNo = %s
+                SET IsStallApprove = 1 
+                WHERE RegitrationNo = %s
             """, (registration_no,))
-            print(f"Updated status to 1 (Approved) for RegistrationNo: {registration_no}")
         elif action == 'reject':
-            print(f"Rejecting exhibitor with registration_no: {registration_no}")
             # Update the exhibitor's status to rejected
             cur.execute("""
                 UPDATE registrationmaster 
-                SET status = -1  -- Rejected
-                WHERE RegistrationNo = %s
+                SET IsStallApprove = 0 
+                WHERE RegitrationNo = %s
             """, (registration_no,))
-            print(f"Updated status to -1 (Rejected) for RegistrationNo: {registration_no}")
         else:
-            # Return an error response if action is invalid
             return jsonify({'success': False, 'message': 'Invalid action'}), 400
 
-        # Commit the changes to the database
+        # Commit the transaction
         connection.commit()
 
-        # Confirm that the status was updated in the database
-        print(f"Commit successful, status updated.")
-
+        # Return success response for AJAX
         if action == 'approve':
-            # Redirect to the stall booking page for this registration
-            return redirect(url_for('book_stall_page', registration_no=registration_no))
-
-        # Return a lightweight response for rejection (no content)
-        return '', 204
+            return jsonify({'success': True, 'redirect_url': url_for('book_stall_page', registration_no=registration_no)})
+        return jsonify({'success': True})
 
     except mysql.connector.Error as err:
-        # Handle MySQL errors
-        print(f"MySQL Error: {err}")
         return jsonify({'success': False, 'message': f'Database error: {err}'}), 500
     except Exception as e:
-        # Handle other errors
-        print(f"General Error: {e}")
         return jsonify({'success': False, 'message': f'An error occurred: {e}'}), 500
     finally:
-        # Ensure to close cursor and connection
         if cur:
             cur.close()
         if connection:
             connection.close()
-
 
 
 
@@ -958,11 +1060,10 @@ def book_stall_page(registration_no):
     try:
         # Connect to the database
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+            user="hei3blcfx7yy",
+            password="Pixoustech@2023",
+            database="tnbeatexpo_registration",
         )
         cur = connection.cursor(dictionary=True)
 
@@ -976,6 +1077,7 @@ def book_stall_page(registration_no):
 
         # Pass slot details and registration number to the template
         return render_template('book_stall.html', slots=slots, registration_no=registration_no)
+
     except mysql.connector.Error as err:
         print(f"MySQL Error: {err}")
         return f"Database error: {err}", 500
@@ -989,52 +1091,64 @@ def book_stall_page(registration_no):
             connection.close()
 
 
-
 @app.route('/book_stall', methods=['POST'])
 def book_stall():
     """Handle stall booking and update the slotmaster table."""
-    connection = None
-    cur = None
     try:
         # Parse JSON data from the frontend
         data = request.json
-        stall_id = data.get('stallId')  # SlotNumber
-        registration_no = data.get('registrationId')  # Exhibitor's registration ID
-        modified_by_username = data.get('modifiedByUserName')  # Username of the person modifying the record
-        modified_by = data.get('modifiedBy')  # ID of the person modifying the record
+        print("Received data:", data)  # Debug log
 
-        if not stall_id or not registration_no or not modified_by_username or not modified_by:
-            return jsonify({"success": False, "message": "Invalid data provided"}), 400
+        # Validate required fields
+        required_fields = ['stallId', 'registrationId', 'modifiedByUserName', 'modifiedBy']
+        missing_fields = [field for field in required_fields if not data.get(field)]
+
+        if missing_fields:
+            return jsonify({
+                "success": False,
+                "message": f"Invalid data provided. Missing fields: {', '.join(missing_fields)}",
+                "registrationId": data.get('registrationId')  # Return the provided registrationNo, if any
+            }), 400
+
+        # Extract data for processing
+        stall_id = data['stallId']
+        registration_no = data['registrationId']
+        modified_by_username = data['modifiedByUserName']
+        modified_by = data['modifiedBy']
 
         # Connect to the database
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+            user="hei3blcfx7yy",
+            password="Pixoustech@2023",
+            database="tnbeatexpo_registration",
         )
         cur = connection.cursor(dictionary=True)
 
-        
-
-        # Check if the stall exists and is already booked
+        # Check if the stall exists
         cur.execute("SELECT * FROM slotmaster WHERE SlotNumber = %s", (stall_id,))
         result = cur.fetchone()
 
         if not result:
-            return jsonify({"success": False, "message": f"Stall ID {stall_id} not found"}), 404
+            return jsonify({
+                "success": False,
+                "message": f"Stall ID {stall_id} not found.",
+                "registrationId": registration_no
+            }), 404
 
-        if result['IsBooked']:  # If IsBooked is true
-            return jsonify({"success": False, "message": "This stall is already booked"}), 400
+        # Check if the stall is already booked
+        if result['IsBooked']:
+            return jsonify({
+                "success": False,
+                "message": f"Stall ID {stall_id} is already booked.",
+                "registrationId": registration_no
+            }), 400
 
-        # Update the slotmaster table to mark the stall as booked and store exhibitor details
+        # Update the stall to mark it as booked
         cur.execute("""
             UPDATE slotmaster
-            SET
-                IsBooked = 1,
+            SET IsBooked = 1,
                 RegistrationId = %s,
-                IsActive = 1,
                 ModifiedDate = NOW(),
                 ModifiedByUserName = %s,
                 ModifiedBy = %s
@@ -1042,18 +1156,37 @@ def book_stall():
         """, (registration_no, modified_by_username, modified_by, stall_id))
         connection.commit()
 
-        return jsonify({"success": True, "message": "Stall booked successfully"}), 200
-    except mysql.connector.Error as err:
-        print(f"MySQL Error: {err}")  # Log the error to the console
-        return jsonify({"success": False, "message": "Database error", "error": str(err)}), 500
+        # Return success response
+        return jsonify({
+            "success": True,
+            "message": f"Stall {stall_id} successfully booked.",
+            "registrationId": registration_no
+        }), 200
+
+    except mysql.connector.Error as db_error:
+        print(f"Database Error: {db_error}")
+        return jsonify({
+            "success": False,
+            "message": "A database error occurred.",
+            "error": str(db_error),
+            "registrationId": data.get('registrationId')
+        }), 500
     except Exception as e:
-        print(f"General Error: {e}")  # Log the error to the console
-        return jsonify({"success": False, "message": "An error occurred", "error": str(e)}), 500
+        print(f"General Error: {e}")
+        return jsonify({
+            "success": False,
+            "message": "An unexpected error occurred.",
+            "error": str(e),
+            "registrationId": data.get('registrationId')
+        }), 500
     finally:
-        if cur:
-            cur.close()
-        if connection:
-            connection.close()
+        try:
+            if cur:
+                cur.close()
+            if connection:
+                connection.close()
+        except NameError:
+            pass  # Handles the case where `connection` or `cur` doesn't exist
 
 
 @app.route('/check_slot_status', methods=['GET'])
@@ -1069,11 +1202,10 @@ def check_slot_status():
     # Database connection
     try:
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+          host="tnbeat2025.pixoustech.in",
+    user="hei3blcfx7yy",
+    password="Pixoustech@2023",
+    database= "tnbeatexpo_registration",
         )
         
         cursor = connection.cursor(dictionary=True)
@@ -1119,11 +1251,10 @@ def filter_slots():
 
     try:
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+    user="hei3blcfx7yy",
+    password="Pixoustech@2023",
+    database= "tnbeatexpo_registration",
         )
         cursor = connection.cursor(dictionary=True)
 
@@ -1156,41 +1287,73 @@ def filter_slots():
 @app.route('/visitor_report')
 def visitor_report():
     try:
-        # Database code to fetch visitor and category data
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+            user="hei3blcfx7yy",
+            password="Pixoustech@2023",
+            database="tnbeatexpo_registration",
         )
         cursor = connection.cursor(dictionary=True)
 
-        # Query for distinct dropdown values
-        cursor.execute("SELECT DISTINCT dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'GENDER'")
-        genders = cursor.fetchall()
+        # Query to get all visitors and their visitor category
+        query_visitors = """
+            SELECT 
+                r.FirstName, 
+                r.LastName, 
+                r.RegitrationNo, 
+                vc.DropDownValue AS VisitorCategory,
+                r.Email, 
+                r.Phone, 
+                g.DropDownValue AS Gender, 
+                s.DropDownValue AS State, 
+                d.DropDownValue AS District
+            FROM 
+                registrationmaster r
+            LEFT JOIN dropdownmaster vc ON r.VisitorCategory = vc.ID AND vc.DropDownType = 'VISITORCATEGORY'
+            LEFT JOIN dropdownmaster g ON r.Gender = g.ID AND g.DropDownType = 'GENDER'
+            LEFT JOIN dropdownmaster s ON r.State = s.ID AND s.DropDownType = 'STATE'
+            LEFT JOIN dropdownmaster d ON r.District = d.ID AND d.DropDownType = 'DISTRICT'
+            WHERE 
+                r.RegitrationType = 'VISITOR';
+        """
+        cursor.execute(query_visitors)
+        visitors = cursor.fetchall()
 
-        cursor.execute("SELECT DISTINCT dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'STATE'")
-        states = cursor.fetchall()
-
-        # Fetch distinct visitor categories
-        cursor.execute("SELECT DISTINCT dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'VISITOR_CATEGORY'")
+        # Query to get all categories, genders, and states for filtering
+        query_category = """
+            SELECT DropDownValue 
+            FROM dropdownmaster 
+            WHERE DropDownType = 'VISITORCATEGORY';
+        """
+        cursor.execute(query_category)
         categories = cursor.fetchall()
 
-        # Fetch other visitor data including Gender, State, and District
-        cursor.execute("""
-            SELECT 
-                FirstName, LastName, RegistrationNo, VisitorCategory, Email, Phone, 
-                Gender, State, District 
-            FROM registrationmaster 
-            WHERE RegistrationType = 'VISITOR'
-        """)
-        visitors = cursor.fetchall()
+        query_gender = """
+            SELECT DropDownValue 
+            FROM dropdownmaster 
+            WHERE DropDownType = 'GENDER';
+        """
+        cursor.execute(query_gender)
+        genders = cursor.fetchall()
+
+        query_state = """
+            SELECT DropDownValue 
+            FROM dropdownmaster 
+            WHERE DropDownType = 'STATE';
+        """
+        cursor.execute(query_state)
+        states = cursor.fetchall()
+
+        # Debugging output
+        print("Visitors Data:", visitors)
+        print("Categories Data:", categories)
+        print("Genders Data:", genders)
+        print("States Data:", states)
 
         cursor.close()
         connection.close()
 
-        # Pass visitors, categories, genders, and states to the template
+        # Pass the data to the template
         return render_template('visitor_report.html', visitors=visitors, categories=categories, genders=genders, states=states)
 
     except mysql.connector.Error as err:
@@ -1200,20 +1363,45 @@ def visitor_report():
 
 
 
+
 @app.route('/seminar_report')
 def seminar_report():
     try:
         # Database connection
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+            user="hei3blcfx7yy",
+            password="Pixoustech@2023",
+            database="tnbeatexpo_registration",
         )
         cursor = connection.cursor(dictionary=True)
         
-        # Fetch dropdown data
+        # Fetch seminar attendees with dropdown values for categories
+        query = """
+            SELECT 
+                r.FirstName, 
+                r.LastName, 
+                r.RegitrationNo, 
+                sc.DropDownValue AS Seminars,
+                r.Email, 
+                r.Phone, 
+                g.DropDownValue AS Gender, 
+                s.DropDownValue AS State, 
+                d.DropDownValue AS District
+            FROM 
+                registrationmaster r
+            LEFT JOIN dropdownmaster sc ON r.Seminars = sc.ID AND sc.DropDownType = 'Seminars'
+            LEFT JOIN dropdownmaster g ON r.Gender = g.ID AND g.DropDownType = 'GENDER'
+            LEFT JOIN dropdownmaster s ON r.State = s.ID AND s.DropDownType = 'STATE'
+            LEFT JOIN dropdownmaster d ON r.District = d.ID AND d.DropDownType = 'DISTRICT'
+            WHERE 
+                r.RegitrationType = 'SEMINAR_ATTENDEE';
+        """
+        
+        cursor.execute(query)
+        seminars = cursor.fetchall()
+
+        # Fetch dropdown data for filters
         cursor.execute("SELECT DISTINCT dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'GENDER'")
         genders = cursor.fetchall()
 
@@ -1225,14 +1413,6 @@ def seminar_report():
 
         cursor.execute("SELECT DISTINCT dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'Seminars'")
         categories = cursor.fetchall()
-
-        # Fetch seminar attendees
-        cursor.execute("""
-            SELECT FirstName, LastName, RegistrationNo, Seminars, Email, Phone, Gender, State, District
-            FROM registrationmaster
-            WHERE RegistrationType = 'SEMINAR_ATTENDEE'
-        """)
-        seminars = cursor.fetchall()
 
         # Close the cursor and connection
         cursor.close()
@@ -1255,16 +1435,17 @@ def seminar_report():
 
 
 
+
+
 @app.route('/exhibitor_report')
 def exhibitor_report():
     try:
         # Connect to the database
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+            user="hei3blcfx7yy",
+            password="Pixoustech@2023",
+            database="tnbeatexpo_registration",
         )
         cursor = connection.cursor(dictionary=True)
 
@@ -1281,12 +1462,29 @@ def exhibitor_report():
         cursor.execute("SELECT DISTINCT dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'BUSINESSCATEGORY'")
         categories = cursor.fetchall()
 
-        # Fetch exhibitor details
-        cursor.execute("""
-            SELECT FirstName, LastName, RegistrationNo, BusinessCategory, Email, Phone, Gender, State, District
-            FROM registrationmaster
-            WHERE RegistrationType = 'EXHIBITOR'
-        """)
+        # Fetch exhibitor details with the values (not IDs)
+        query = """
+            SELECT 
+                r.FirstName, 
+                r.LastName, 
+                r.RegitrationNo, 
+                bc.DropDownValue AS BusinessCategory,
+                r.Email, 
+                r.Phone, 
+                g.DropDownValue AS Gender, 
+                s.DropDownValue AS State, 
+                d.DropDownValue AS District
+            FROM 
+                registrationmaster r
+            LEFT JOIN dropdownmaster bc ON r.BusinessCategory = bc.ID AND bc.DropDownType = 'BUSINESSCATEGORY'
+            LEFT JOIN dropdownmaster g ON r.Gender = g.ID AND g.DropDownType = 'GENDER'
+            LEFT JOIN dropdownmaster s ON r.State = s.ID AND s.DropDownType = 'STATE'
+            LEFT JOIN dropdownmaster d ON r.District = d.ID AND d.DropDownType = 'DISTRICT'
+            WHERE 
+                r.RegitrationType = 'EXHIBITORS';
+        """
+
+        cursor.execute(query)
         exhibitors = cursor.fetchall()
 
         # Close the cursor and connection
@@ -1303,20 +1501,20 @@ def exhibitor_report():
 
 
 
+
 @app.route('/others_report')
 def others_report():
     try:
         # Connect to the database
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="12345678",
-            database="db_a8c9f1_tnbeats",
-            auth_plugin="mysql_native_password"
+            host="tnbeat2025.pixoustech.in",
+            user="hei3blcfx7yy",
+            password="Pixoustech@2023",
+            database="tnbeatexpo_registration",
         )
         cursor = connection.cursor(dictionary=True)
 
-        # Query to fetch distinct dropdown values
+        # Query to fetch distinct dropdown values for Gender, State, District, and Others Category
         cursor.execute("SELECT DISTINCT dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'GENDER'")
         genders = cursor.fetchall()
 
@@ -1329,12 +1527,29 @@ def others_report():
         cursor.execute("SELECT DISTINCT dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'OthersCategory'")
         categories = cursor.fetchall()
 
-        # Query to fetch 'Others' data with Gender, State, and District
-        cursor.execute("""
-            SELECT FirstName, LastName, RegistrationNo, OthersCategory, Email, Phone, Gender, State, District
-            FROM registrationmaster
-            WHERE RegistrationType = 'OTHERS'  # Update condition to match 'Others' registration type
-        """)
+        # Query to fetch 'Others' data with Gender, State, District, and OthersCategory values
+        query = """
+            SELECT 
+                r.FirstName, 
+                r.LastName, 
+                r.RegitrationNo, 
+                oc.DropDownValue AS OthersCategory,
+                r.Email, 
+                r.Phone, 
+                g.DropDownValue AS Gender, 
+                s.DropDownValue AS State, 
+                d.DropDownValue AS District
+            FROM 
+                registrationmaster r
+            LEFT JOIN dropdownmaster oc ON r.OthersCategory = oc.ID AND oc.DropDownType = 'OthersCategory'
+            LEFT JOIN dropdownmaster g ON r.Gender = g.ID AND g.DropDownType = 'GENDER'
+            LEFT JOIN dropdownmaster s ON r.State = s.ID AND s.DropDownType = 'STATE'
+            LEFT JOIN dropdownmaster d ON r.District = d.ID AND d.DropDownType = 'DISTRICT'
+            WHERE 
+                r.RegitrationType = 'OTHERS';
+        """
+
+        cursor.execute(query)
         others = cursor.fetchall()
 
         # Close the cursor and connection
@@ -1342,11 +1557,19 @@ def others_report():
         connection.close()
 
         # Pass the 'others', 'genders', 'states', 'districts', and 'categories' data to the template
-        return render_template('others_report.html', others=others, genders=genders, states=states, districts=districts, categories=categories)
+        return render_template(
+            'others_report.html', 
+            others=others, 
+            genders=genders, 
+            states=states, 
+            districts=districts, 
+            categories=categories
+        )
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         return "Error connecting to the database", 500
+
 
 
 

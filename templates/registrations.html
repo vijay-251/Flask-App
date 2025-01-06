@@ -277,8 +277,8 @@ text-decoration-skip-ink: none;
                             <option value="">All Types</option>
                             {% for type in registrationtypes %}
                                 <option value="{{ type['RegistrationType'] }}"
-                                    {% if request.form['registrationtype'] == type['RegistrationType'] %}selected{% endif %}>
-                                    {{ type['RegistrationType'] }}
+                                    {% if request.form['registrationtype'] == type['RegitrationType'] %}selected{% endif %}>
+                                    {{ type['RegitrationType'] }}
                                 </option>
                             {% endfor %}
                         </select>
@@ -328,45 +328,46 @@ text-decoration-skip-ink: none;
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/2.3.4/js/buttons.html5.min.js"></script>
 
 
-            <div class="table-responsive">
-                <table id="registrationTable" class="row-border">
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox"></th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Registration Number</th>
-                            <th>Registration Type</th>
-                            <th>Email Address</th>
-                            <th>Phone</th>
-                            <th>Gender</th>
-                            <th>State</th>
-                            <th>District</th>
-                        </tr>
-                    </thead>
-                    
-                    <tbody>
-                        {% for registration in registrations %}
-                            <tr>
-                                <td><input type="checkbox"></td>
-                                <td>{{ registration['FirstName'] }}</td>
-                                <td>{{ registration['LastName'] }}</td>
-                                <td><a href="{{ url_for('visitor_details', registration_no=registration['RegistrationNo']) }}">{{ registration['RegistrationNo'] }}</a></td>
-                                <td>{{ registration['RegistrationType'] }}</td>
-                                <td>{{ registration['Email'] }}</td>
-                                <td>{{ registration['Phone'] }}</td>
-                                <td>{{ registration['Gender'] }}</td>
-                                <td>{{ registration['State'] }}</td>
-                                <td>{{ registration['District'] }}</td>
-                            </tr>
-                        {% else %}
-                            <tr>
-                                <td colspan="10" class="text-center">No records found</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+<div class="table-responsive">
+    <table id="registrationTable" class="row-border">
+        <thead>
+            <tr>
+                <th><input type="checkbox"></th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Registration Number</th>
+                <th>Registration Type</th>
+                <th>Email Address</th>
+                <th>Phone</th>
+                <th>Gender</th>
+                <th>State</th>
+                <th>District</th>
+            </tr>
+        </thead>
+        
+        <tbody>
+            {% for registration in registrations %}
+                <tr>
+                    <td><input type="checkbox"></td>
+                    <td>{{ registration['FirstName'] }}</td>
+                    <td>{{ registration['LastName'] }}</td>
+                    <td><a href="{{ url_for('visitor_details', registration_no=registration['RegitrationNo']) }}">{{ registration['RegitrationNo'] }}</a></td>
+                    <td>{{ registration['RegitrationType'] }}</td>
+                    <td>{{ registration['Email'] }}</td>
+                    <td>{{ registration['Phone'] }}</td>
+                    <td>{{ registration['Gender'] }}</td> <!-- Display actual Gender -->
+                    <td>{{ registration['State'] }}</td>   <!-- Display actual State -->
+                    <td>{{ registration['District'] }}</td> <!-- Display actual District -->
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="10" class="text-center">No records found</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
             <script>
     $(document).ready(function() {
     $('#registrationTable').DataTable({
