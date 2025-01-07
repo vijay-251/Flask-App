@@ -1295,13 +1295,13 @@ def visitor_report():
         )
         cursor = connection.cursor(dictionary=True)
 
-        # Query to get all visitors and their visitor category
-        query_visitors = """
+        # Updated query to include VisitorCategory value
+        cursor.execute("""
             SELECT 
                 r.FirstName, 
                 r.LastName, 
                 r.RegitrationNo, 
-                vc.DropDownValue AS VisitorCategory,
+                vc.DropDownValue AS VisitorCategory, 
                 r.Email, 
                 r.Phone, 
                 g.DropDownValue AS Gender, 
@@ -1309,52 +1309,24 @@ def visitor_report():
                 d.DropDownValue AS District
             FROM 
                 registrationmaster r
-            LEFT JOIN dropdownmaster vc ON r.VisitorCategory = vc.ID AND vc.DropDownType = 'VISITORCATEGORY'
-            LEFT JOIN dropdownmaster g ON r.Gender = g.ID AND g.DropDownType = 'GENDER'
-            LEFT JOIN dropdownmaster s ON r.State = s.ID AND s.DropDownType = 'STATE'
-            LEFT JOIN dropdownmaster d ON r.District = d.ID AND d.DropDownType = 'DISTRICT'
+                LEFT JOIN dropdownmaster vc ON r.VisitorCategory = vc.ID AND vc.DropDownType = 'VISITOR_CATEGORY'
+                LEFT JOIN dropdownmaster g ON r.Gender = g.ID AND g.DropDownType = 'GENDER'
+                LEFT JOIN dropdownmaster s ON r.State = s.ID AND s.DropDownType = 'STATE'
+                LEFT JOIN dropdownmaster d ON r.District = d.ID AND d.DropDownType = 'DISTRICT'
             WHERE 
                 r.RegitrationType = 'VISITOR';
-        """
-        cursor.execute(query_visitors)
+        """)
         visitors = cursor.fetchall()
 
-        # Query to get all categories, genders, and states for filtering
-        query_category = """
-            SELECT DropDownValue 
-            FROM dropdownmaster 
-            WHERE DropDownType = 'VISITORCATEGORY';
-        """
-        cursor.execute(query_category)
+        # Fetch dropdown values for filters (optional)
+        cursor.execute("SELECT DISTINCT dropdownvalue FROM dropdownmaster WHERE dropdowntype = 'VISITOR_CATEGORY'")
         categories = cursor.fetchall()
-
-        query_gender = """
-            SELECT DropDownValue 
-            FROM dropdownmaster 
-            WHERE DropDownType = 'GENDER';
-        """
-        cursor.execute(query_gender)
-        genders = cursor.fetchall()
-
-        query_state = """
-            SELECT DropDownValue 
-            FROM dropdownmaster 
-            WHERE DropDownType = 'STATE';
-        """
-        cursor.execute(query_state)
-        states = cursor.fetchall()
-
-        # Debugging output
-        print("Visitors Data:", visitors)
-        print("Categories Data:", categories)
-        print("Genders Data:", genders)
-        print("States Data:", states)
 
         cursor.close()
         connection.close()
 
-        # Pass the data to the template
-        return render_template('visitor_report.html', visitors=visitors, categories=categories, genders=genders, states=states)
+        # Pass visitors and categories to the template
+        return render_template('visitor_report.html', visitors=visitors, categories=categories)
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
