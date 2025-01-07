@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Report</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .sidebar {
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .sidebar a:hover {
+            background-color:  #06568E;
+            color: white;
+        }
+        .sidebar a.active {
+    background-color: #004080;
+    color: white;
+    border-radius: 10px;
+}
+
+        .sidebar img {
+            width: 180px;
+            margin: 0 auto 20px;
+        }
+        .header {
+            background-color: #06568E;
+            color: white;
+            padding: 15px;
+            margin-top: 30px;
+            margin-left: 10px;
+            margin-right: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h5 {
+            margin: 0;
+        }
+
+        .header .welcome-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .header .welcome-section span {
+            margin-right: 15px;
+        }
+
+        .header .welcome-section a {
+            text-decoration: none;
+            color: white;
+        }
+
+        .header .welcome-section i {
+            font-size: 24px;
+        }
+        thead {
+            position: sticky;
+            top: 0;
+            background-color: #06568E;
+            color: white;
+        }
+        .footer {
+        margin-top: 20px;
+        text-align: center;
+    }
+    .pagination {
+        display: inline-block;
+        padding-left: 0;
+        list-style: none;
+    }
+    .pagination li {
+        display: inline;
+        margin: 0 5px;
+    }
+    /* Custom style for pagination buttons */
+.dataTables_paginate .paginate_button {
+    border: 1px solid #ddd;       /* Light border around pagination numbers */
+    padding: 5px 10px;             /* Add padding inside the box */
+    margin: 0 2px;                 /* Small margin between the boxes */
+    font-size: 14px;               /* Adjust font size */
+    color: #06568E;                /* Text color for numbers */
+    background-color: white;      /* White background */
+    cursor: pointer;              /* Make the cursor a pointer on hover */
+    border-radius: 4px;            /* Rounded corners for the buttons */
+}
+
+/* Style for active pagination button */
+.dataTables_paginate .paginate_button.active {
+    background-color: #06568E;     /* Active button background */
+    color: white;                  /* Active button text color */
+    border: 1px solid #06568E;     /* Active button border */
+}
+
+/* Hover effect for pagination buttons */
+.dataTables_paginate .paginate_button:hover {
+    background-color: #f1f1f1;    /* Light background on hover */
+    color: #06568E;                /* Text color on hover */
+}
+ 
+ 
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 d-md-block sidebar">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="logo">
+                <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+                <a href="{{ url_for('registration') }}"><i class="fas fa-user-plus"></i>Registration</a>
+                <a href="{{ url_for('stall_allocation') }}"><i class="fas fa-th"></i>Stall Allocation</a>
+                <a href="#" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false" aria-controls="reportMenu"><i class="fas fa-chart-bar"></i>Report</a>
+                <div class="collapse" id="reportMenu">
+                    <a href="/visitor_report" class="ms-3">Visitors</a>
+                    <a href="{{ url_for('seminar_report') }}" class="ms-3">Seminar</a>
+                    <a href="/exhibitor_report" class="ms-3">Exhibitors</a>
+                    <a href="{{ url_for('others_report') }}" class="ms-3">Others</a> <!-- Changed to 'Others' -->
+                    
+                   
+                </div>
+                <a href="{{ url_for('admin_login') }}"><i class="fas fa-sign-out-alt"></i>Logout</a>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-10 ms-sm-auto">
+                <div class="header">
+                    <h5>Visitor Report</h5>
+                    <div class="welcome-section">
+                        <span>Welcome Admin</span>
+                        <a href="{{ url_for('admin_login') }}" style="color: white; text-decoration: none;">
+                            <i class="fas fa-user-circle" style="font-size: 24px;"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="container mt-4">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex mb-3">
+                                <select class="form-select me-2" id="genderDropdown" onchange="filterData()">
+                                    <option value="">Select Gender</option>
+                                    {% for gender in genders %}
+                                    <option value="{{ gender['DropDownValue'] }}">{{ gender['DropDownValue'] }}</option>
+                                    {% endfor %}
+                                </select>
+                                
+                                <select class="form-select me-2" id="categoryDropdown" onchange="filterData()">
+                                    <option value="">Select Category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category['DropDownValue'] }}">{{ category['DropDownValue'] }}</option>
+                                    {% endfor %}
+                                </select>
+                                
+                                <select class="form-select" id="stateDropdown" onchange="filterData()">
+                                    <option value="">Select State</option>
+                                    {% for state in states %}
+                                    <option value="{{ state['DropDownValue'] }}">{{ state['DropDownValue'] }}</option>
+                                    {% endfor %}
+                                </select>
+                                
+                                
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <!-- Left Section -->
+                                <div class="d-flex align-items-center">
+                                    <label for="entries" class="me-2">Show</label>
+                                    <select id="entries" class="form-select d-inline-block w-auto me-3">
+                                        <option>5</option>
+                                        <option value="10" selected>10</option>
+                                        <option>25</option>
+                                    </select>
+                                    <span class="me-3">entries</span>
+                                    <button class="btn btn-primary btn-sm me-2" style="background-color: #06568E; border-color: #06568E;">Excel</button>
+                                    <button class="btn btn-secondary btn-sm" style="background-color: #06568E; border-color: #06568E;">PDF</button>
+                                </div>
+                            
+                                <!-- Right Section -->
+                                <div class="d-flex align-items-center">
+                                    <input type="text" class="form-control d-inline-block w-auto" placeholder="Search">
+                                </div>
+                            </div>
+
+                          
+                            
+                          
+                            <div class="col-md-12">
+                                <!-- Wrapper for horizontal scrolling -->
+                                <div id="table-wrapper" style="overflow-x: auto; width: 100%;"> <!-- Removed the border -->
+                                    <table class="table mt-3" id="data-table" style="width: 184%; table-layout: fixed; border-collapse: collapse;"> <!-- table-layout: fixed ensures equal column widths -->
+                                        <thead>
+                                            <tr>
+                                                <th>First Name</th>
+                                                <th>Last Name</th>
+                                                <th>Registration No</th>
+                                                <th>Visitors Category</th>
+                                                <th>Email Address</th>
+                                                <th>Phone Number</th>
+                                                <th>Gender</th> <!-- Added Gender column -->
+                                                <th>State</th>  <!-- Added State column -->
+                                                <th>District</th> <!-- Added District column -->
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for visitor in visitors %}
+                                            <tr>
+                                                <td>{{ visitor['FirstName'] }}</td>
+                                                <td>{{ visitor['LastName'] }}</td>
+                                                <td>{{ visitor['RegitrationNo'] }}</td>
+                                                <td>{{ visitor['VisitorCategory'] }}</td> <!-- Check if this displays properly -->
+                                                <td>{{ visitor['Email'] }}</td>
+                                                <td>{{ visitor['Phone'] }}</td>
+                                                <td>{{ visitor['Gender'] }}</td>
+                                                <td>{{ visitor['State'] }}</td>
+                                                <td>{{ visitor['District'] }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            
+                        
+                        
+
+
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables - Load second -->
+    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+    <script>
+   $(document).ready(function() {
+            // Initialize DataTable with pagination
+            $('#data-table').DataTable({
+                "paging": true,                  // Enable pagination
+                "pagingType": "simple_numbers",  // Show numeric pagination (1, 2, 3, ...)
+                "pageLength": 10,                // Set the default number of rows per page to 10
+                "lengthChange": false,           // Disable the "entries" dropdown
+                "searching": false,              // Disable the search box (optional)
+                "ordering": false,               // Disable column sorting (optional)
+                "info": false                    // Disable table info (optional)
+            });
+        });
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const tableWrapper = document.getElementById("table-wrapper");
+    const table = document.getElementById("data-table");
+
+    // Check if the table width exceeds the wrapper width
+    function checkTableOverflow() {
+        if (table.scrollWidth > tableWrapper.clientWidth) {
+            tableWrapper.style.overflowX = 'auto'; // Enable horizontal scroll
+        } else {
+            tableWrapper.style.overflowX = 'hidden'; // Disable horizontal scroll
+        }
+    }
+
+    // Call the function initially
+    checkTableOverflow();
+
+    // Recheck when resizing
+    window.addEventListener("resize", checkTableOverflow);
+});
+
+
+
+
+
+function filterData() {
+        var selectedGender = document.getElementById('genderDropdown').value;
+        var selectedCategory = document.getElementById('categoryDropdown').value;
+        var selectedState = document.getElementById('stateDropdown').value;
+
+        // Get all rows in the table
+        var rows = document.querySelectorAll('table tbody tr');
+
+        rows.forEach(function(row) {
+            var gender = row.querySelector('td:nth-child(6)').textContent.trim(); // Assuming Gender is in the 6th column
+            var visitorCategory = row.querySelector('td:nth-child(4)').textContent.trim(); // Assuming VisitorCategory is in the 4th column
+            var state = row.querySelector('td:nth-child(7)').textContent.trim(); // Assuming State is in the 7th column
+
+            // Check if row matches the selected filters
+            var matchesGender = (selectedGender === "" || gender === selectedGender);
+            var matchesCategory = (selectedCategory === "" || visitorCategory === selectedCategory);
+            var matchesState = (selectedState === "" || state === selectedState);
+
+            // Show or hide row based on the filter matches
+            if (matchesGender && matchesCategory && matchesState) {
+                row.style.display = ''; // Show the row
+            } else {
+                row.style.display = 'none'; // Hide the row
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const entriesDropdown = document.getElementById("entries");
+        const searchInput = document.querySelector("input[placeholder='Search']");
+        const excelButton = document.querySelector(".btn-primary");
+        const pdfButton = document.querySelector(".btn-secondary");
+        const table = document.querySelector("table tbody");
+        const rows = Array.from(table.querySelectorAll("tr"));
+
+        // Function to handle entries dropdown
+        entriesDropdown.addEventListener("change", function () {
+            const entries = parseInt(entriesDropdown.value, 10); // Get selected value
+            rows.forEach((row, index) => {
+                row.style.display = index < entries ? "" : "none"; // Show only the selected number of rows
+            });
+        });
+
+        // Function to handle search
+        searchInput.addEventListener("input", function () {
+            const query = searchInput.value.toLowerCase().trim(); // Get search query
+            rows.forEach(row => {
+                const rowText = row.textContent.toLowerCase(); // Combine text from all cells
+                row.style.display = rowText.includes(query) ? "" : "none"; // Show row if it matches query
+            });
+        });
+
+        // Function to export table to Excel
+        excelButton.addEventListener("click", function () {
+            const tableContent = `
+                <table>
+                    ${table.outerHTML}
+                </table>
+            `;
+            const blob = new Blob([tableContent], { type: "application/vnd.ms-excel" });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "table_export.xls";
+            a.click();
+            window.URL.revokeObjectURL(url);
+        });
+
+        // Function to export table to PDF
+        pdfButton.addEventListener("click", function () {
+            const doc = new jsPDF();
+            doc.autoTable({
+                html: table.closest("table"), // Use the table element for PDF
+                styles: { halign: 'center' },
+            });
+            doc.save("table_export.pdf");
+        });
+    });
+
+
+
+  
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
